@@ -30,21 +30,21 @@ WHEEL_BASE    = 0.42109     # m  (wheel_separation)
 
 # ── Hardware limits (từ thông số động cơ: 40 RPM) ─────────────────────────
 MOTOR_MAX_RPM   = 40.0
-OMEGA_MAX       = MOTOR_MAX_RPM * 2 * math.pi / 60   # = 4.189 rad/s
+OMEGA_MAX       = MOTOR_MAX_RPM * 2 * math.pi / 60   # = 4.189 rad/s  
 V_MAX_HW        = OMEGA_MAX * WHEEL_RADIUS             # = 0.3458 m/s
-W_MAX_HW        = 2 * V_MAX_HW / WHEEL_BASE            # = 1.642 rad/s
+
 
 # ── STM32 command range (giữ nguyên như firmware đang set) ────────────────
-STM32_SPEED_MAX = 150
-STM32_STEER_MAX = 80
+STM32_SPEED_MAX = 40
+STM32_STEER_MAX = 40
 
 # ── Scale: ánh xạ v_max_hw → STM32_MAX ───────────────────────────────────
-CMD_SCALE_SPEED = STM32_SPEED_MAX / V_MAX_HW   # = 150 / 0.3458 = 433.8
-CMD_SCALE_STEER = STM32_STEER_MAX / W_MAX_HW   # = 80  / 1.642  = 48.7
+CMD_SCALE_SPEED = 40
+CMD_SCALE_STEER = 40
 
 # ── Nav2 velocity limits (chỉnh trong nav2_params.yaml, khai báo ở đây để dùng clamp)
-MAX_LINEAR_VEL  = 0.15   # m/s  — chỉ dùng để clamp input từ Nav2, không dùng trong scale
-MAX_ANGULAR_VEL = 0.5    # rad/s
+MAX_LINEAR_VEL  = 0.346   # m/s  — chỉ dùng để clamp input từ Nav2, không dùng trong scale
+MAX_ANGULAR_VEL = 1.643    # rad/s
 
 class WheelOdomNode(Node):
     def __init__(self):
