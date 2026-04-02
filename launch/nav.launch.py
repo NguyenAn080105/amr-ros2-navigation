@@ -98,7 +98,7 @@ def generate_launch_description():
         parameters=[{
             'use_sim_time':      use_sim_time,
             'robot_description': Command(['xacro ', urdf_file]),
-            'publish_frequency': 10.0,
+            'publish_frequency': 50.0,   # SYNC: khớp EKF 50Hz — TF base_link→sensors phải mới nhất
         }]
     )
 
@@ -229,9 +229,9 @@ def generate_launch_description():
     )
 
     # ══════════════════════════════════════════════════════════════════════════
-    # NODE 9 — Nav2 Bringup                                           [t = 15s]
+    # NODE 9 — Nav2 Bringup                                           [t = 12s]
     # ══════════════════════════════════════════════════════════════════════════
-    # Delay 15s = 10s (scan filter ready) + 5s buffer for /scan_filtered to stabilize.
+    # Delay 12s = 10s (scan filter ready) + 2s buffer for /scan_filtered to stabilize.
     #
     # Launches the full Nav2 navigation stack:
     #   - map_server       : serves the pre-built occupancy grid map
@@ -255,15 +255,15 @@ def generate_launch_description():
     )
 
     delayed_nav2 = TimerAction(
-        period=15.0,
+        period=12.0,
         actions=[
-            LogInfo(msg='[nav] [15.0s] Starting Nav2 bringup...'),
+            LogInfo(msg='[nav] [12.0s] Starting Nav2 bringup...'),
             nav2_bringup,
         ]
     )
 
     # ══════════════════════════════════════════════════════════════════════════
-    # NODE 10 — Checkpoint Navigator  (optional)                      [t = 20s]
+    # NODE 10 — Checkpoint Navigator  (optional)                      [t = 22s]
     # ══════════════════════════════════════════════════════════════════════════
     # Only launched when autostart_navigator:=true.
     #
@@ -289,35 +289,10 @@ def generate_launch_description():
     )
 
     delayed_checkpoint_nav = TimerAction(
-        period=20.0,
+        period=15.0,
         actions=[
             LogInfo(msg='[nav] Starting checkpoint_navigator...'),
             checkpoint_navigator_node,
-        ]
-    )
-
-    set_initial_pose = TimerAction(
-        period=20.0,
-        actions=[
-            LogInfo(msg='[nav] [20.0s] Publishing initial pose to AMCL...'),
-            ExecuteProcess(
-                cmd=[
-                    'ros2', 'topic', 'pub', '--once',
-                    '/initialpose',
-                    'geometry_msgs/msg/PoseWithCovarianceStamped',
-                    '''{
-                        "header": {"frame_id": "map"},
-                        "pose": {
-                            "pose": {
-                                "position": {"x": -3.89858, "y": -7.20180, "z": 0.0},
-                                "orientation": {"x": 0.0, "y": 0.0, "z": -0.19, "w": 0.98}
-                            },
-                            "covariance": [0.25,0,0,0,0,0, 0,0.25,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0, 0,0,0,0,0,0.07]
-                        }
-                    }'''
-                ],
-                output='screen'
-            )
         ]
     )
 
@@ -342,6 +317,5 @@ def generate_launch_description():
         delayed_ekf,
         delayed_scan_filter,
         delayed_nav2,
-        set_initial_pose,
         delayed_checkpoint_nav,
     ])

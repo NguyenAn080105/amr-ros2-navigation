@@ -102,7 +102,7 @@ bt_navigator_rclcpp_node:
 controller_server:
   ros__parameters:
     use_sim_time: False
-    controller_frequency: 20.0
+    controller_frequency: 25.0
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.001
     min_theta_velocity_threshold: 0.001
@@ -117,31 +117,32 @@ controller_server:
       min_vel_y: 0.0
       max_vel_x: 0.15
       max_vel_y: 0.0
-      max_vel_theta: 0.15
-      min_vel_theta: 0.1
+      max_vel_theta: 0.5
+      min_vel_theta: 0.05
       min_speed_xy: 0.0
       max_speed_xy: 0.15
       min_speed_theta: 0.0
 
       # --- Acceleration limits ---
-      acc_lim_x: 2.0
+      acc_lim_x: 0.10 
       acc_lim_y: 0.0
-      acc_lim_theta: 1.5
-      decel_lim_x: -2.5
+      acc_lim_theta: 0.25
+
+      decel_lim_x: -0.15
       decel_lim_y: 0.0
-      decel_lim_theta: -3.2
+      decel_lim_theta: -0.38
 
       # --- Sampling ---
-      vx_samples: 30
+      vx_samples: 20
       vy_samples: 0
-      vtheta_samples: 30
+      vtheta_samples: 20
 
       # --- Trajectory simulation ---
       sim_time: 1.5
       linear_granularity: 0.05
       angular_granularity: 0.025
-      transform_tolerance: 0.2
-      trans_stopped_velocity: 0.10
+      transform_tolerance: 0.3
+      trans_stopped_velocity: 0.05
       short_circuit_trajectory_evaluation: True
       stateful: True
 
@@ -179,8 +180,8 @@ local_costmap:
       height: 5
       resolution: 0.05
       footprint: "[[0.30,0.25],[0.30,-0.25],[-0.10,-0.25],[-0.10,0.25]]"
-      update_frequency: 20.0
-      publish_frequency: 10.0
+      update_frequency: 25.0
+      publish_frequency: 12.0
       obstacle_layer:
         enabled: True
         observation_sources: scan
@@ -291,7 +292,7 @@ recoveries_server:
     min_rotational_vel: 0.4
     rotational_acc_lim: 3.2
 
-# ==================== ROBOT STATE PUBLISHER ====================
+# # ==================== ROBOT STATE PUBLISHER ====================
 # robot_state_publisher:
 #   ros__parameters:
 #     use_sim_time: False

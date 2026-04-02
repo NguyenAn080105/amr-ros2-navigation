@@ -21,16 +21,30 @@ START_FRAME   = 0xABCD
 PACKET_FORMAT = '<HHHH'   # start(u16), omegaL(i16), omegaR(i16), checksum
 OMEGA_SCALE   = 100.0     # counts → rad/s
 
-CMD_SCALE_SPEED = 150.0
-CMD_SCALE_STEER = 80.0
-MAX_LINEAR_VEL  = 0.15     # m/s — khớp với max_vel_x trong nav2_params.yaml
-MAX_ANGULAR_VEL = 0.15     # rad/s — khớp với max_vel_theta
 CMD_FORMAT = '<HhhH'      # start(u16), steer(i16), speed(i16), checksum(u16)
 CMD_START_FRAME = 0xABCD
 
 # ── Robot parameters ───────────────────────────────────────────────────────
 WHEEL_RADIUS  = 0.08255     # m  (từ URDF)
 WHEEL_BASE    = 0.42109     # m  (wheel_separation)
+
+# ── Hardware limits (từ thông số động cơ: 40 RPM) ─────────────────────────
+MOTOR_MAX_RPM   = 40.0
+OMEGA_MAX       = MOTOR_MAX_RPM * 2 * math.pi / 60   # = 4.189 rad/s
+V_MAX_HW        = OMEGA_MAX * WHEEL_RADIUS             # = 0.3458 m/s
+W_MAX_HW        = 2 * V_MAX_HW / WHEEL_BASE            # = 1.642 rad/s
+
+# ── STM32 command range (giữ nguyên như firmware đang set) ────────────────
+STM32_SPEED_MAX = 150
+STM32_STEER_MAX = 80
+
+# ── Scale: ánh xạ v_max_hw → STM32_MAX ───────────────────────────────────
+CMD_SCALE_SPEED = STM32_SPEED_MAX / V_MAX_HW   # = 150 / 0.3458 = 433.8
+CMD_SCALE_STEER = STM32_STEER_MAX / W_MAX_HW   # = 80  / 1.642  = 48.7
+
+# ── Nav2 velocity limits (chỉnh trong nav2_params.yaml, khai báo ở đây để dùng clamp)
+MAX_LINEAR_VEL  = 0.15   # m/s  — chỉ dùng để clamp input từ Nav2, không dùng trong scale
+MAX_ANGULAR_VEL = 0.5    # rad/s
 
 class WheelOdomNode(Node):
     def __init__(self):
@@ -208,17 +222,20 @@ class WheelOdomNode(Node):
         super().destroy_node()
         
     def _cmd_vel_callback(self, msg: Twist):
-        """Nhận /cmd_vel từ Nav2 hoặc teleop, gửi xuống STM32 qua UART TX."""
         v = msg.linear.x
         w = msg.angular.z
 
-        # Quy đổi sang đơn vị STM32 firmware [-1000, 1000]
-        speed = int(( v / MAX_LINEAR_VEL) * CMD_SCALE_SPEED)
-        steer = int((-w / MAX_ANGULAR_VEL) * CMD_SCALE_STEER)  # dấu âm tùy chiều quay
+        # Clamp theo giới hạn Nav2 trước
+        v = max(-MAX_LINEAR_VEL,  min(MAX_LINEAR_VEL,  v))
+        w = max(-MAX_ANGULAR_VEL, min(MAX_ANGULAR_VEL, w))
 
-        # Clamp để tránh overflow
-        speed = max(-150, min(150, speed))
-        steer = max(-80,  min(80,  steer))
+        # Quy đổi thẳng từ m/s → STM32 units dựa trên v_max hardware thực tế
+        speed = int(v * CMD_SCALE_SPEED)   # 0.15 m/s → 0.15 × 433.8 = 65
+        steer = int(-w * CMD_SCALE_STEER)  # dấu âm tùy chiều quay STM32
+
+        # Clamp hardware limit
+        speed = max(-STM32_SPEED_MAX, min(STM32_SPEED_MAX, speed))
+        steer = max(-STM32_STEER_MAX, min(STM32_STEER_MAX, steer))
 
         self._send_command(speed, steer)
 
