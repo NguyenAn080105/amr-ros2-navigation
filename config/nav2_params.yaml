@@ -7,27 +7,29 @@ amcl:
     initial_pose_y: -7.20180
     initial_pose_z: 0.0
     initial_pose_yaw: -0.38
-    # initial_pose_x: 0.0
-    # initial_pose_y: 0.0
-    # initial_pose_z: 0.0
-    # initial_pose_yaw: 0.0
+
     alpha1: 0.5
     alpha2: 0.3
     alpha3: 0.3
     alpha4: 0.5
     alpha5: 0.3
+
     base_frame_id: "base_footprint"
-    beam_skip_distance: 0.5
+
+    beam_skip_distance: 0.3
     beam_skip_error_threshold: 0.9
     beam_skip_threshold: 0.3
     do_beamskip: True
+
     global_frame_id: "map"
+
     lambda_short: 0.1
     laser_likelihood_max_dist: 2.0
     laser_max_range: 20.0
     laser_min_range: -1.0
     laser_model_type: "likelihood_field"
     max_beams: 60
+    
     max_particles: 2000
     min_particles: 500
     odom_frame_id: "odom"
@@ -128,7 +130,7 @@ controller_server:
       acc_lim_y: 0.0
       acc_lim_theta: 1.0
 
-      decel_lim_x: -0.5
+      decel_lim_x: -0.172
       decel_lim_y: 0.0
       decel_lim_theta: -0.821
 
