@@ -15,12 +15,14 @@ amcl:
     alpha5: 0.3
 
     base_frame_id: "base_footprint"
-    beam_skip_distance: 0.5
+
+    beam_skip_distance: 0.3
     beam_skip_error_threshold: 0.9
     beam_skip_threshold: 0.3
     do_beamskip: True
 
     global_frame_id: "map"
+
     lambda_short: 0.1
     laser_likelihood_max_dist: 2.0
     laser_max_range: 20.0
@@ -124,11 +126,11 @@ controller_server:
       min_speed_theta: 0.0
 
       # --- Acceleration limits ---
-      acc_lim_x: 0.3
+      acc_lim_x: 0.0865
       acc_lim_y: 0.0
       acc_lim_theta: 1.0
 
-      decel_lim_x: -0.5
+      decel_lim_x: -0.172
       decel_lim_y: 0.0
       decel_lim_theta: -0.821
 
