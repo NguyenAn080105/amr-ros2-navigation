@@ -124,11 +124,7 @@ controller_server:
       min_speed_theta: 0.0
 
       # --- Acceleration limits ---
-<<<<<<< HEAD
       acc_lim_x: 0.0865
-=======
-      acc_lim_x: 0.3
->>>>>>> b10f02a018cf5eeda8c7c89541b73324b9be60e6
       acc_lim_y: 0.0
       acc_lim_theta: 1.0
 
