@@ -20,7 +20,7 @@ amcl:
     beam_skip_distance: 0.5
     beam_skip_error_threshold: 0.9
     beam_skip_threshold: 0.3
-    do_beamskip: false
+    do_beamskip: True
     global_frame_id: "map"
     lambda_short: 0.1
     laser_likelihood_max_dist: 2.0
@@ -124,21 +124,21 @@ controller_server:
       min_speed_theta: 0.0
 
       # --- Acceleration limits ---
-      acc_lim_x: 0.173
+      acc_lim_x: 0.3
       acc_lim_y: 0.0
-      acc_lim_theta: 0.548
+      acc_lim_theta: 1.0
 
-      decel_lim_x: -0.173
+      decel_lim_x: -0.5
       decel_lim_y: 0.0
       decel_lim_theta: -0.821
 
       # --- Sampling ---
-      vx_samples: 15
+      vx_samples: 20
       vy_samples: 0
-      vtheta_samples: 16
+      vtheta_samples: 24
 
       # --- Trajectory simulation ---
-      sim_time: 1.0
+      sim_time: 1.5
       linear_granularity: 0.05
       angular_granularity: 0.025
       transform_tolerance: 0.3
@@ -196,8 +196,8 @@ local_costmap:
           obstacle_max_range: 2.5
           obstacle_min_range: 0.0
       inflation_layer:
-        cost_scaling_factor: 5.0
-        inflation_radius: 0.55
+        cost_scaling_factor: 3.5
+        inflation_radius: 0.35
       always_send_full_costmap: True
 
 # ==================== GLOBAL COSTMAP ====================
@@ -212,14 +212,13 @@ global_costmap:
       update_frequency: 8.0
       publish_frequency: 3.0
 
-      # plugin_names: ["static_layer", "obstacle_layer", "inflation_layer"]
-      plugin_names: ["obstacle_layer", "inflation_layer"]
+      plugin_names: ["static_layer", "obstacle_layer", "inflation_layer"]
       plugin_types:
-        # - "nav2_costmap_2d::StaticLayer"
+        - "nav2_costmap_2d::StaticLayer"
         - "nav2_costmap_2d::ObstacleLayer"
         - "nav2_costmap_2d::InflationLayer"
-      # static_layer:
-      #   map_subscribe_transient_local: True
+      static_layer:
+        map_subscribe_transient_local: True
       obstacle_layer:
         enabled: True
         observation_sources: scan
@@ -234,8 +233,8 @@ global_costmap:
           obstacle_max_range: 2.5
           obstacle_min_range: 0.0
       inflation_layer:
-        cost_scaling_factor: 5.0
-        inflation_radius: 0.55
+        cost_scaling_factor: 3.5
+        inflation_radius: 0.35
       always_send_full_costmap: True
   global_costmap_client:
     ros__parameters:
