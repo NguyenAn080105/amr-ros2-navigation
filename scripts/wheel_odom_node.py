@@ -39,7 +39,7 @@ STM32_SPEED_MAX = 40
 STM32_STEER_MAX = 40
 
 # ── Scale: ánh xạ v_max_hw → STM32_MAX ───────────────────────────────────
-CMD_SCALE_SPEED = 40
+CMD_SCALE_SPEED = 116
 CMD_SCALE_STEER = 40
 
 # ── Nav2 velocity limits (chỉnh trong nav2_params.yaml, khai báo ở đây để dùng clamp)
