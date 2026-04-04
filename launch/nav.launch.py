@@ -263,7 +263,7 @@ def generate_launch_description():
     )
 
     # ══════════════════════════════════════════════════════════════════════════
-    # NODE 10 — Checkpoint Navigator  (optional)                      [t = 22s]
+    # NODE 10 — Checkpoint Navigator  (optional)                      [t = 15s]
     # ══════════════════════════════════════════════════════════════════════════
     # Only launched when autostart_navigator:=true.
     #
