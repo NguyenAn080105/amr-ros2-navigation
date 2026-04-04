@@ -45,7 +45,7 @@
         </inertial>
     </xacro:macro>
 
-    <xacro:include filename="gazebo_control.xacro" />
+    <!-- <xacro:include filename="gazebo_control.xacro" /> -->
 
     <!-- ==================== PROPERTIES ==================== -->
     <xacro:property name="chassis_length" value="0.38"/>

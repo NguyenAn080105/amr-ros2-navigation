@@ -65,8 +65,8 @@ bt_navigator:
     use_sim_time: False
     global_frame: map
     robot_base_frame: base_footprint
-    odom_topic: /odom
-    bt_loop_duration: 5
+    odom_topic: /odometry/filtered 
+    bt_loop_duration: 10
     default_server_timeout: 10
     default_bt_xml_filename: "/opt/ros/foxy/share/nav2_bt_navigator/behavior_trees/navigate_w_replanning_and_recovery.xml"
     enable_groot_monitoring: False
@@ -120,13 +120,13 @@ controller_server:
       max_vel_x: 0.346
       max_vel_y: 0.0
       max_vel_theta: 1.643
-      min_vel_theta: 0.0
+      min_vel_theta: -1.643
       min_speed_xy: 0.0
       max_speed_xy: 0.346
       min_speed_theta: 0.0
 
       # --- Acceleration limits ---
-      acc_lim_x: 0.0865
+      acc_lim_x: 0.173
       acc_lim_y: 0.0
       acc_lim_theta: 1.0
 
@@ -182,8 +182,8 @@ local_costmap:
       height: 5
       resolution: 0.05
       footprint: "[[0.32, 0.30], [0.32, -0.30], [-0.12, -0.30], [-0.12, 0.30]]"
-      update_frequency: 10.0
-      publish_frequency: 5.0
+      update_frequency: 5.0
+      publish_frequency: 2.0
       obstacle_layer:
         enabled: True
         observation_sources: scan
@@ -193,9 +193,9 @@ local_costmap:
           clearing: True
           marking: True
           data_type: "LaserScan"
-          raytrace_max_range: 3.5
+          raytrace_max_range: 5.5
           raytrace_min_range: 0.0
-          obstacle_max_range: 3.0
+          obstacle_max_range: 5.0
           obstacle_min_range: 0.0
       inflation_layer:
         cost_scaling_factor: 3.5
