@@ -35,15 +35,15 @@ V_MAX_HW        = OMEGA_MAX * WHEEL_RADIUS             # = 0.3458 m/s
 
 
 # ── STM32 command range (giữ nguyên như firmware đang set) ────────────────
-STM32_SPEED_MAX = 58
+STM32_SPEED_MAX = 58 # toc toi da duoc phep gui cho stm32 (rpm) thay neu can tang toc 
 STM32_STEER_MAX = 40
 
 # ── Scale: ánh xạ v_max_hw → STM32_MAX ───────────────────────────────────
-CMD_SCALE_SPEED = 116
+CMD_SCALE_SPEED = 116 # he so doi m/s thanh rpm
 CMD_SCALE_STEER = 40
 
 # ── Nav2 velocity limits (chỉnh trong nav2_params.yaml, khai báo ở đây để dùng clamp)
-MAX_LINEAR_VEL  = 0.5   # m/s  — chỉ dùng để clamp input từ Nav2, không dùng trong scale
+MAX_LINEAR_VEL  = 0.5   # thay cho giong so trong nav2.yaml day la v max duoc phep di cua xe do nav2 qui dinh
 MAX_ANGULAR_VEL = 1.643    # rad/s
 
 class WheelOdomNode(Node):
