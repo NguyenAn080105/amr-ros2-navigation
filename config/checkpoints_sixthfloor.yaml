@@ -1,0 +1,62 @@
+checkpoints:
+  - display_name: Elevator
+    id: 0
+    name: elevator
+    orientation:
+      w: 0.208944
+      x: 0.0
+      y: 0.0
+      z: 0.977928
+    position:
+      x: -3.72973
+      y: 6.53243
+      z: 0.0
+  - display_name: LAB Room
+    id: 1
+    name: lab_room
+    orientation:
+      w: 0.241941
+      x: 0.0
+      y: 0.0
+      z: 0.970291
+    position:
+      x: 0.0209436
+      y: -0.0325093
+      z: 0.0
+  - display_name: Head of Department Office
+    id: 2
+    name: head_of_department_office
+    orientation:
+      w: 0.977339
+      x: 0.0
+      y: 0.0
+      z: -0.211678
+    position:
+      x: 4.47999
+      y: 24.2773
+      z: 0.0
+  - display_name: Restroom
+    id: 3
+    name: restroom
+    orientation:
+      w: 0.522866
+      x: 0.0
+      y: 0.0
+      z: -0.852415
+    position:
+      x: -3.76221
+      y: 5.20581
+      z: 0.0
+  - display_name: Meeting Room E6.3
+    id: 4
+    name: meeting_room_e6_3
+    orientation:
+      w: 0.837336
+      x: 0.0
+      y: 0.0
+      z: 0.546688
+    position:
+      x: 1.45436
+      y: 13.1023
+      z: 0.0
+frame_id: map

@@ -64,9 +64,9 @@
   <!-- ============================================================
        NAVIGATION (Nav2) — uncomment khi dùng navigation
   ============================================================ -->
-  <!-- <depend>nav2_bringup</depend> -->
-  <!-- <depend>nav2_msgs</depend>    -->
-  <!-- <depend>nav_msgs</depend>     -->
+   <depend>nav2_bringup</depend> 
+   <depend>nav2_msgs</depend>    
+   <depend>nav_msgs</depend>     
 
   <!-- ============================================================
        VISUALIZATION
