@@ -3,10 +3,10 @@ amcl:
   ros__parameters:
     use_sim_time: False
     set_initial_pose: False
-    initial_pose_x: -3.89858
-    initial_pose_y: -7.20180
-    initial_pose_z: 0.0
-    initial_pose_yaw: -0.38
+    # initial_pose_x: -3.89858
+    # initial_pose_y: -7.20180
+    # initial_pose_z: 0.0
+    # initial_pose_yaw: -0.38
 
     alpha1: 0.5
     alpha2: 0.3
@@ -17,7 +17,7 @@ amcl:
     base_frame_id: "base_footprint"
 
     beam_skip_distance: 0.3
-    beam_skip_error_threshold: 0.6
+    beam_skip_error_threshold: 0.9
     beam_skip_threshold: 0.3
     do_beamskip: True
 
@@ -28,26 +28,26 @@ amcl:
     laser_max_range: 14.9
     laser_min_range: 0.07
     laser_model_type: "likelihood_field"
-    max_beams: 180                        # Số tia laser tối đa dùng trong mỗi lần cập nhật.
+    max_beams: 180
     
     max_particles: 2000
     min_particles: 500
     odom_frame_id: "odom"
     pf_err: 0.05
     pf_z: 0.99
-    recovery_alpha_fast: 0.1
-    recovery_alpha_slow: 0.005
+    recovery_alpha_fast: 0.0
+    recovery_alpha_slow: 0.0
     resample_interval: 1
     robot_model_type: "differential"
     save_pose_rate: 0.5
-    sigma_hit: 0.1      
+    sigma_hit: 0.2
     tf_broadcast: true
     transform_tolerance: 0.2
     update_min_a: 0.1
     update_min_d: 0.1
-    z_hit: 0.7
+    z_hit: 0.5
     z_max: 0.05
-    z_rand: 0.2
+    z_rand: 0.5
     z_short: 0.05
     scan_topic: /scan_filtered
 
@@ -66,7 +66,7 @@ bt_navigator:
     global_frame: map
     robot_base_frame: base_footprint
     odom_topic: /odometry/filtered 
-    bt_loop_duration: 10
+    bt_loop_duration: 5
     default_server_timeout: 10
     default_bt_xml_filename: "/opt/ros/foxy/share/nav2_bt_navigator/behavior_trees/navigate_w_replanning_and_recovery.xml"
     enable_groot_monitoring: False
@@ -115,29 +115,24 @@ controller_server:
       debug_trajectory_details: False
 
       # --- Velocity limits ---
-      # đi thẳng
       min_vel_x: 0.0
-      max_vel_x: 0.5
-      # đi ngang
       min_vel_y: 0.0
+      max_vel_x: 0.346
       max_vel_y: 0.0
-      # xoay 
       max_vel_theta: 1.643
-      min_vel_theta: -1.643
-      # độ lớn tuyệt đối
+      min_vel_theta: 0.0
       min_speed_xy: 0.0
-      max_speed_xy: 0.5
-      # Độ lớn vận tốc góc nhỏ nhất
+      max_speed_xy: 0.346
       min_speed_theta: 0.0
 
       # --- Acceleration limits ---
-      acc_lim_x: 0.25
+      acc_lim_x: 0.0865
       acc_lim_y: 0.0
       acc_lim_theta: 1.0
 
-      decel_lim_x: -0.25
+      decel_lim_x: -0.172
       decel_lim_y: 0.0
-      decel_lim_theta: -1.0
+      decel_lim_theta: -0.821
 
       # --- Sampling ---
       vx_samples: 20
@@ -145,7 +140,7 @@ controller_server:
       vtheta_samples: 24
 
       # --- Trajectory simulation ---
-      sim_time: 2.0
+      sim_time: 1.5
       linear_granularity: 0.05
       angular_granularity: 0.025
       transform_tolerance: 0.3
@@ -154,16 +149,16 @@ controller_server:
       stateful: True
 
       # --- Goal tolerance ---
-      xy_goal_tolerance: 0.15
-      yaw_goal_tolerance: 0.2
+      xy_goal_tolerance: 0.25
+      yaw_goal_tolerance: 0.25
 
       # --- Critics ---
       critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
       BaseObstacle.scale: 32.0
       PathAlign.scale: 32.0
-      PathAlign.forward_point_distance: 0.3
+      PathAlign.forward_point_distance: 0.1
       GoalAlign.scale: 12.0
-      GoalAlign.forward_point_distance: 0.2
+      GoalAlign.forward_point_distance: 0.1
       PathDist.scale: 32.0
       GoalDist.scale: 24.0
       RotateToGoal.scale: 32.0
@@ -180,15 +175,14 @@ local_costmap:
     ros__parameters:
       use_sim_time: False
       global_frame: odom
-      robot_base_frame: base_footprint
       plugin_names: ["obstacle_layer", "inflation_layer"]
       plugin_types: ["nav2_costmap_2d::ObstacleLayer", "nav2_costmap_2d::InflationLayer"]
       rolling_window: true
       width: 5
       height: 5
       resolution: 0.05
-      footprint: "[[0.32, 0.30], [0.32, -0.30], [-0.12, -0.30], [-0.12, 0.30]]"     # bán kính ngoại tiếp robot ~0.44m 
-      update_frequency: 10.0
+      footprint: "[[0.32, 0.30], [0.32, -0.30], [-0.12, -0.30], [-0.12, 0.30]]"
+      update_frequency: 20.0
       publish_frequency: 2.0
       obstacle_layer:
         enabled: True
@@ -199,13 +193,13 @@ local_costmap:
           clearing: True
           marking: True
           data_type: "LaserScan"
-          raytrace_max_range: 5.5
+          raytrace_max_range: 5.5     
           raytrace_min_range: 0.0
-          obstacle_max_range: 5.0
+          obstacle_max_range: 5.0     
           obstacle_min_range: 0.0
       inflation_layer:
-        cost_scaling_factor: 2.5
-        inflation_radius: 1.0
+        cost_scaling_factor: 3.5
+        inflation_radius: 0.5
       always_send_full_costmap: True
 
 # ==================== GLOBAL COSTMAP ====================
@@ -217,7 +211,7 @@ global_costmap:
       footprint: "[[0.32, 0.30], [0.32, -0.30], [-0.12, -0.30], [-0.12, 0.30]]"
       resolution: 0.05
       robot_base_frame: base_footprint
-      update_frequency: 2.0
+      update_frequency: 3.0
       publish_frequency: 2.0
 
       plugin_names: ["static_layer", "obstacle_layer", "inflation_layer"]
@@ -238,11 +232,11 @@ global_costmap:
           data_type: "LaserScan"
           raytrace_max_range: 10.5
           raytrace_min_range: 0.0
-          obstacle_max_range: 10
+          obstacle_max_range: 10.0
           obstacle_min_range: 0.0
       inflation_layer:
-        cost_scaling_factor: 2.5
-        inflation_radius: 1.0
+        cost_scaling_factor: 3.5
+        inflation_radius: 0.5
       always_send_full_costmap: True
   global_costmap_client:
     ros__parameters:
@@ -255,7 +249,7 @@ global_costmap:
 map_server:
   ros__parameters:
     use_sim_time: False
-    yaml_filename: ""
+    yaml_filename: "/home/nguyenan/mbrobot_ws/src/mobile_robot/maps/lab_demo_map.yaml"
 
 # ==================== PLANNER SERVER ====================
 planner_server:
@@ -265,7 +259,7 @@ planner_server:
     planner_plugins: ["GridBased"]
     GridBased:
       plugin: "nav2_navfn_planner/NavfnPlanner"
-      tolerance: 0.25
+      tolerance: 0.5
       use_astar: true
       allow_unknown: true
 
@@ -296,7 +290,7 @@ recoveries_server:
     transform_tolerance: 0.1
     simulate_ahead_time: 2.0
     max_rotational_vel: 1.0
-    min_rotational_vel: 0.2
+    min_rotational_vel: 0.4
     rotational_acc_lim: 0.8     # old value: 3.2
 
 # # ==================== ROBOT STATE PUBLISHER ====================
