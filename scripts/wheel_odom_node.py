@@ -28,23 +28,49 @@ CMD_START_FRAME = 0xABCD
 WHEEL_RADIUS  = 0.08255     # m  (từ URDF)
 WHEEL_BASE    = 0.42109     # m  (wheel_separation)
 
-# ── Hardware limits (từ thông số động cơ: 40 RPM) ─────────────────────────
-MOTOR_MAX_RPM   = 60.0
-OMEGA_MAX       = MOTOR_MAX_RPM * 2 * math.pi / 60   # = 4.189 rad/s  
-V_MAX_HW        = OMEGA_MAX * WHEEL_RADIUS             # = 0.3458 m/s
+# -----------------------------------------------------------------------------------------
+# 1. GIỚI HẠN PHẦN CỨNG THỰC TẾ CỦA ĐỘNG CƠ (HARDWARE LIMITS)
 
+# Tốc độ quay tối đa thực tế của động cơ hoverboard (RPM) thiết lập (config) trong STM32 firmware.
+MOTOR_MAX_RPM   = 60.0  
 
-# ── STM32 command range (giữ nguyên như firmware đang set) ────────────────
-STM32_SPEED_MAX = 40
-STM32_STEER_MAX = 40
+# Vận tốc góc tối đa của bánh xe (rad/s)
+# OMEGA = RPM * (2 * pi / 60)
+OMEGA_MAX       = MOTOR_MAX_RPM * 2 * math.pi / 60      # = 6.283 rad/s
 
-# ── Scale: ánh xạ v_max_hw → STM32_MAX ───────────────────────────────────
+# Vận tốc tịnh tiến tối đa lý thuyết mà hệ thống cơ khí có thể đạt được (m/s)
+# v = r * w 
+V_MAX_HW        = OMEGA_MAX * WHEEL_RADIUS              # = 0.518 m/s       
+
+# -----------------------------------------------------------------------------------------
+# 2. GIỚI HẠN VÀ HỆ SỐ QUY ĐỔI CHO LỆNH ĐIỀU KHIỂN (UART COMMANDS ĐẾN STM32)
+# Dành cho firmware "hoverboard-firmware-hack-FOC"
+
+# Hệ số quy đổi lệnh vận tốc tịnh tiến từ ROS (m/s) sang STM32 (int).
 CMD_SCALE_SPEED = 116
+
+# Hệ số quy đổi lệnh vận tốc góc (xoay) từ ROS (rad/s) sang STM32 (int).
 CMD_SCALE_STEER = 40
 
-# ── Nav2 velocity limits (chỉnh trong nav2_params.yaml, khai báo ở đây để dùng clamp)
-MAX_LINEAR_VEL  = 0.346   # m/s  — chỉ dùng để clamp input từ Nav2, không dùng trong scale
-MAX_ANGULAR_VEL = 1.643    # rad/s
+# Ngưỡng vận tốc tịnh tiến tối đa (Speed) được phép gửi xuống STM32
+# Công thức: STM32_SPEED_MAX = MAX_LINEAR_VEL * CMD_SCALE_SPEED 
+STM32_SPEED_MAX = 58 
+
+# Ngưỡng vận tốc xoay tối đa (Steer) được phép gửi xuống STM32.
+# Công thức: STM32_STEER_MAX = MAX_ANGULAR_VEL * CMD_SCALE_STEER 
+STM32_STEER_MAX = 65.72
+
+# -----------------------------------------------------------------------------------------
+# 3. GIỚI HẠN VẬN TỐC PHẦN MỀM (SOFTWARE LIMITS DÀNH CHO NAV2 / BỘ ĐIỀU KHIỂN)
+
+# Vận tốc tịnh tiến tối đa cho phép (m/s)
+MAX_LINEAR_VEL  = 0.5   
+
+# Vận tốc góc tối đa cho phép robot xoay (Yaw) (rad/s)
+# Công thức w = (2 * v_wheel) / wheel_base. 
+MAX_ANGULAR_VEL = 1.643
+
+
 
 class WheelOdomNode(Node):
     def __init__(self):
