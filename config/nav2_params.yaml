@@ -40,7 +40,7 @@ amcl:
     resample_interval: 1
     robot_model_type: "differential"
     save_pose_rate: 0.5
-    sigma_hit: 0.2
+    sigma_hit: 0.1      
     tf_broadcast: true
     transform_tolerance: 0.2
     update_min_a: 0.1
@@ -137,7 +137,7 @@ controller_server:
 
       decel_lim_x: -0.25
       decel_lim_y: 0.0
-      decel_lim_theta: -0.821
+      decel_lim_theta: -1.0
 
       # --- Sampling ---
       vx_samples: 20
@@ -296,7 +296,7 @@ recoveries_server:
     transform_tolerance: 0.1
     simulate_ahead_time: 2.0
     max_rotational_vel: 1.0
-    min_rotational_vel: 0.4
+    min_rotational_vel: 0.2
     rotational_acc_lim: 0.8     # old value: 3.2
 
 # # ==================== ROBOT STATE PUBLISHER ====================
