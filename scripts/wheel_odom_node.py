@@ -30,8 +30,8 @@ WHEEL_BASE    = 0.42109     # m  (wheel_separation)
 
 # ── Hardware limits (từ thông số động cơ: 40 RPM) ─────────────────────────
 MOTOR_MAX_RPM   = 60.0
-OMEGA_MAX       = MOTOR_MAX_RPM * 2 * math.pi / 60   # = 4.189 rad/s  
-V_MAX_HW        = OMEGA_MAX * WHEEL_RADIUS             # = 0.3458 m/s
+OMEGA_MAX       = MOTOR_MAX_RPM * 2 * math.pi / 60   # = 6.283 rad/s  
+V_MAX_HW        = OMEGA_MAX * WHEEL_RADIUS             # = 0.518 m/s
 
 
 # ── STM32 command range (giữ nguyên như firmware đang set) ────────────────
