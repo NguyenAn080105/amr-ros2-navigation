@@ -10,11 +10,11 @@ amcl:
 
     # Nhiễu mô hình chuyển động odometry (dẫn động vi sai).
     # α1: quay→quay  | α2: tịnh tiến→quay | α3: tịnh tiến→tịnh tiến | α4: quay→tịnh tiến | α5: tịnh tiến→tịnh tiến (trượt ngang)
-    alpha1: 0.5   # nhiễu quay gây ra bởi chuyển động quay
-    alpha2: 0.3   # nhiễu quay gây ra bởi chuyển động tịnh tiến
-    alpha3: 0.3   # nhiễu tịnh tiến gây ra bởi chuyển động tịnh tiến
-    alpha4: 0.5   # nhiễu tịnh tiến gây ra bởi chuyển động quay
-    alpha5: 0.3   # không sử dụng cho dẫn động vi sai
+    alpha1: 0.1   # nhiễu quay gây ra bởi chuyển động quay
+    alpha2: 0.1   # nhiễu quay gây ra bởi chuyển động tịnh tiến
+    alpha3: 0.1   # nhiễu tịnh tiến gây ra bởi chuyển động tịnh tiến
+    alpha4: 0.1   # nhiễu tịnh tiến gây ra bởi chuyển động quay
+    alpha5: 0.1   # không sử dụng cho dẫn động vi sai
 
     base_frame_id: "base_footprint"
 
@@ -43,10 +43,10 @@ amcl:
     pf_z: 0.99                     # mức độ tin cậy KLD (99 %)
 
     # Trọng số lấy mẫu lại thích nghi chậm/nhanh (0 = tắt bơm pose ngẫu nhiên).
-    recovery_alpha_fast: 0.0
-    recovery_alpha_slow: 0.0
+    recovery_alpha_fast: 0.001
+    recovery_alpha_slow: 0.001
 
-    resample_interval: 1           # lấy mẫu lại sau mỗi N bước cập nhật bộ lọc
+    resample_interval: 2           # lấy mẫu lại sau mỗi N bước cập nhật bộ lọc
 
     robot_model_type: "differential"
 
@@ -146,7 +146,6 @@ controller_server:
       min_vel_theta: 0.0
       min_speed_xy: 0.0            # [m/s] tốc độ XY kết hợp tối thiểu
       max_speed_xy: 0.346          # [m/s] tốc độ XY kết hợp tối đa
-      min_speed_theta: 0.0
 
       # ── Giới hạn gia tốc / giảm tốc ──────────────────────────────────────
       # Dốc tăng tốc nhẹ nhàng để ngăn trượt bánh và giảm nhiễu rung IMU.
