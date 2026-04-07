@@ -61,9 +61,15 @@ amcl:
     update_min_d: 0.1              # [m]   dịch chuyển tuyến tính tối thiểu
 
     # Trọng số hỗn hợp của mô hình cảm biến tia chùm (tổng phải bằng 1.0).
+<<<<<<< HEAD
     z_hit: 0.85                     # trọng số: mô hình va chạm Gaussian
     z_max: 0.05                    # trọng số: mô hình lỗi hết tầm đo
     z_rand: 0.05                    # trọng số: mô hình đo ngẫu nhiên/đồng đều
+=======
+    z_hit: 0.7                     # trọng số: mô hình va chạm Gaussian
+    z_max: 0.05                    # trọng số: mô hình lỗi hết tầm đo
+    z_rand: 0.2                    # trọng số: mô hình đo ngẫu nhiên/đồng đều
+>>>>>>> ea10f5d4ee77cdc1bfd2f50122eaa8959ac84174
     z_short: 0.05                  # trọng số: mô hình vật cản bất ngờ cự ly ngắn
 
     scan_topic: /scan_filtered     # dùng scan đã lọc (đã loại bỏ tia phản xạ từ thân robot)
