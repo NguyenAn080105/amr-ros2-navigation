@@ -43,9 +43,11 @@ V_MAX_HW        = OMEGA_MAX * WHEEL_RADIUS              # = 0.3458 m/s
 # Dành cho firmware "hoverboard-firmware-hack-FOC"
 
 # Hệ số quy đổi lệnh vận tốc tịnh tiến từ ROS (m/s) sang STM32 (int).
+# CMD_SCALE_SPEED = STM32_SPEED_MAX / MAX_LINEAR_VEL
 CMD_SCALE_SPEED = 116
 # Hệ số quy đổi lệnh vận tốc góc (xoay) từ ROS (rad/s) sang STM32 (int).
-CMD_SCALE_STEER = 40
+# CMD_SCALE_STEER = STM32_STEER_MAX / MAX_ANGULAR_VEL
+CMD_SCALE_STEER = 25
 
 # Ngưỡng vận tốc tịnh tiến tối đa (Speed) được phép gửi xuống STM32
 # Công thức: STM32_SPEED_MAX = MAX_LINEAR_VEL * CMD_SCALE_SPEED 
