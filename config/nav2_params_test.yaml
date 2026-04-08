@@ -33,7 +33,7 @@ amcl:
     laser_model_type: "likelihood_field" # mô hình ưu tiên cho môi trường trong nhà 2-D
 
     # Số tia được lấy mẫu con cho mỗi bước cập nhật
-    max_beams: 180    # 2 độ mỗi tia
+    max_beams: 120    # 2 độ mỗi tia
     
     max_particles: 2000            # giới hạn trên số lượng hạt — trần độ chính xác
     min_particles: 500             # giới hạn dưới số lượng hạt — sàn tài nguyên CPU
@@ -43,8 +43,8 @@ amcl:
     pf_z: 0.99                     # mức độ tin cậy KLD (99 %)
 
     # Trọng số lấy mẫu lại thích nghi chậm/nhanh (0 = tắt bơm pose ngẫu nhiên).
-    recovery_alpha_fast: 0.1
-    recovery_alpha_slow: 0.001
+    recovery_alpha_fast: 0.0
+    recovery_alpha_slow: 0.0
 
     resample_interval: 2           # lấy mẫu lại sau mỗi N bước cập nhật bộ lọc
 
@@ -84,7 +84,7 @@ bt_navigator:
     robot_base_frame: base_footprint
     odom_topic: /odometry/filtered   # odometry hợp nhất bằng EKF dùng cho phản hồi vận tốc
     bt_loop_duration: 100            # [ms] chu kỳ tick của Behavior Tree
-    default_server_timeout: 20       # [s]  thời gian chờ gọi action server
+    default_server_timeout: 10       # [s]  thời gian chờ gọi action server
     default_bt_xml_filename: "/opt/ros/foxy/share/nav2_bt_navigator/behavior_trees/navigate_w_replanning_and_recovery.xml"
     enable_groot_monitoring: False   # tắt trực quan hóa BT thời gian thực (tiết kiệm CPU)
     groot_zmq_publisher_port: 1666
@@ -153,24 +153,24 @@ controller_server:
 
       # ── Giới hạn vận tốc ──────────────────────────────────────────────────
       # v_max phần cứng = 0.5 m/s; giảm 30 % vì an toàn → 0.346 m/s
-      min_vel_x: 0.0               # [m/s] không điều khiển lùi
+      min_vel_x: 0.2               # [m/s] không điều khiển lùi
       min_vel_y: 0.0               # [m/s] không dịch ngang (dẫn động vi sai)
-      max_vel_x: 0.346             # [m/s] giới hạn vận tốc tiến
+      max_vel_x: 0.5               # [m/s] giới hạn vận tốc tiến
       max_vel_y: 0.0               # [m/s] không dịch ngang (dẫn động vi sai)
       max_vel_theta: 1.643         # [rad/s] giới hạn tốc độ góc (≈ giới hạn phần cứng)
       min_vel_theta: -1.643
       min_speed_xy: 0.0            # [m/s] tốc độ XY kết hợp tối thiểu
-      max_speed_xy: 0.346          # [m/s] tốc độ XY kết hợp tối đa
+      max_speed_xy: 0.5            # [m/s] tốc độ XY kết hợp tối đa
 
       # ── Giới hạn gia tốc / giảm tốc ──────────────────────────────────────
       # Dốc tăng tốc nhẹ nhàng để ngăn trượt bánh và giảm nhiễu rung IMU.
-      acc_lim_x: 1.73              # [m/s²]  từ 0 lên tối đa trong ≈ 4 s
+      acc_lim_x: 0.1              # [m/s²]  từ 0 lên tối đa trong ≈ 4 s
       acc_lim_y: 0.0               # [m/s²]  dẫn động vi sai
-      acc_lim_theta: 1.0           # [rad/s²]
+      acc_lim_theta: 1.25           # [rad/s²]
 
-      decel_lim_x: -0.172          # [m/s²]  dốc phanh (gấp 2× gia tốc để dừng chặt hơn)
+      decel_lim_x: -0.35           # [m/s²]  dốc phanh (gấp 2× gia tốc để dừng chặt hơn)
       decel_lim_y: 0.0
-      decel_lim_theta: -0.821      # [rad/s²]
+      decel_lim_theta: -1.25      # [rad/s²]
 
       # ── Lấy mẫu quỹ đạo ──────────────────────────────────────────────────
       vx_samples: 20               # số mẫu vận tốc tuyến tính trong cửa sổ động
@@ -178,7 +178,7 @@ controller_server:
       vtheta_samples: 20           # số mẫu vận tốc góc
 
       # ── Mô phỏng tiến ───────────────────────────────────────────────────
-      sim_time: 2.5                # [s]   độ dài chân trời rollout
+      sim_time: 1.5                # [s]   độ dài chân trời rollout
       linear_granularity: 0.05     # [m]   bước cung tròn để kiểm tra va chạm
       angular_granularity: 0.025   # [rad] bước góc để kiểm tra va chạm
       transform_tolerance: 0.5     # [s]   dung sai tuổi tra cứu TF
@@ -346,8 +346,8 @@ recoveries_server:
     simulate_ahead_time: 2.0         # [s]  kiểm tra va chạm tiến trước khi thực thi phục hồi
 
     # Giới hạn bao vận tốc góc áp dụng trong quá trình phục hồi Spin.
-    max_rotational_vel: 0.5          # [rad/s] giới hạn trên
-    min_rotational_vel: 0.3          # [rad/s] giới hạn dưới để thắng ma sát tĩnh
+    max_rotational_vel: 0.3          # [rad/s] giới hạn trên
+    min_rotational_vel: 0.2          # [rad/s] giới hạn dưới để thắng ma sát tĩnh
     rotational_acc_lim: 0.5          # [rad/s²] dốc nhẹ nhàng để giảm nhiễu IMU
 
 

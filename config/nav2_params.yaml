@@ -33,7 +33,7 @@ amcl:
     laser_model_type: "likelihood_field" # mô hình ưu tiên cho môi trường trong nhà 2-D
 
     # Số tia được lấy mẫu con cho mỗi bước cập nhật
-    max_beams: 180    # 2 độ mỗi tia
+    max_beams: 120    # 2 độ mỗi tia
     
     max_particles: 2000            # giới hạn trên số lượng hạt — trần độ chính xác
     min_particles: 500             # giới hạn dưới số lượng hạt — sàn tài nguyên CPU
@@ -161,10 +161,10 @@ controller_server:
       # ── Lấy mẫu quỹ đạo ──────────────────────────────────────────────────
       vx_samples: 20               # số mẫu vận tốc tuyến tính trong cửa sổ động
       vy_samples: 0                # không lấy mẫu ngang
-      vtheta_samples: 30           # số mẫu vận tốc góc
+      vtheta_samples: 20           # số mẫu vận tốc góc
 
       # ── Mô phỏng tiến ───────────────────────────────────────────────────
-      sim_time: 1.5                # [s]   độ dài chân trời rollout
+      sim_time: 2.5                # [s]   độ dài chân trời rollout
       linear_granularity: 0.05     # [m]   bước cung tròn để kiểm tra va chạm
       angular_granularity: 0.025   # [rad] bước góc để kiểm tra va chạm
       transform_tolerance: 0.3     # [s]   dung sai tuổi tra cứu TF
