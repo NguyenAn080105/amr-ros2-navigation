@@ -43,7 +43,7 @@ amcl:
     pf_z: 0.99                     # mức độ tin cậy KLD (99 %)
 
     # Trọng số lấy mẫu lại thích nghi chậm/nhanh (0 = tắt bơm pose ngẫu nhiên).
-    recovery_alpha_fast: 0.001
+    recovery_alpha_fast: 0.1
     recovery_alpha_slow: 0.001
 
     resample_interval: 2           # lấy mẫu lại sau mỗi N bước cập nhật bộ lọc
@@ -54,7 +54,7 @@ amcl:
     sigma_hit: 0.2                 # [m]  độ lệch chuẩn của mô hình va chạm Gaussian
 
     tf_broadcast: true             # AMCL phát TF map → odom
-    transform_tolerance: 0.2       # [s]  dung sai nhãn thời gian TF
+    transform_tolerance: 0.5       # [s]  dung sai nhãn thời gian TF
 
     # Chuyển động tối thiểu để kích hoạt cập nhật bộ lọc (tránh tích lũy trôi khi đứng yên).
     update_min_a: 0.1              # [rad] dịch chuyển góc tối thiểu
@@ -83,8 +83,8 @@ bt_navigator:
     global_frame: map
     robot_base_frame: base_footprint
     odom_topic: /odometry/filtered   # odometry hợp nhất bằng EKF dùng cho phản hồi vận tốc
-    bt_loop_duration: 10             # [ms] chu kỳ tick của Behavior Tree
-    default_server_timeout: 10       # [s]  thời gian chờ gọi action server
+    bt_loop_duration: 100            # [ms] chu kỳ tick của Behavior Tree
+    default_server_timeout: 20       # [s]  thời gian chờ gọi action server
     default_bt_xml_filename: "/opt/ros/foxy/share/nav2_bt_navigator/behavior_trees/navigate_w_replanning_and_recovery.xml"
     enable_groot_monitoring: False   # tắt trực quan hóa BT thời gian thực (tiết kiệm CPU)
     groot_zmq_publisher_port: 1666
@@ -130,6 +130,21 @@ controller_server:
     min_y_velocity_threshold: 0.001  # [m/s] (không dùng — dẫn động vi sai)
     min_theta_velocity_threshold: 0.001 # [rad/s]
 
+    # FIX: Thêm progress_checker để tuning timeout "Failed to make progress"
+    progress_checker_plugin: "progress_checker"
+    progress_checker:
+      plugin: "nav2_controller::SimpleProgressChecker"
+      required_movement_radius: 0.1   # [m] phải di chuyển ít nhất 10cm
+      movement_time_allowance: 15.0   # [s] trong vòng 15s (was mặc định 5s → quá ngắn)
+ 
+    # FIX: Thêm goal_checker riêng để control tolerance
+    goal_checker_plugin: "goal_checker"
+    goal_checker:
+      plugin: "nav2_controller::SimpleGoalChecker"
+      xy_goal_tolerance: 0.25
+      yaw_goal_tolerance: 0.25
+      stateful: True
+
     controller_plugins: ["FollowPath"]
 
     FollowPath:
@@ -160,13 +175,13 @@ controller_server:
       # ── Lấy mẫu quỹ đạo ──────────────────────────────────────────────────
       vx_samples: 20               # số mẫu vận tốc tuyến tính trong cửa sổ động
       vy_samples: 0                # không lấy mẫu ngang
-      vtheta_samples: 30           # số mẫu vận tốc góc
+      vtheta_samples: 20           # số mẫu vận tốc góc
 
       # ── Mô phỏng tiến ───────────────────────────────────────────────────
-      sim_time: 1.5                # [s]   độ dài chân trời rollout
+      sim_time: 2.5                # [s]   độ dài chân trời rollout
       linear_granularity: 0.05     # [m]   bước cung tròn để kiểm tra va chạm
       angular_granularity: 0.025   # [rad] bước góc để kiểm tra va chạm
-      transform_tolerance: 0.3     # [s]   dung sai tuổi tra cứu TF
+      transform_tolerance: 0.5     # [s]   dung sai tuổi tra cứu TF
       trans_stopped_velocity: 0.02 # [m/s] ngưỡng tốc độ xác định "robot đứng yên"
       short_circuit_trajectory_evaluation: True # huỷ chấm điểm ngay khi chạm vùng chi phí chết người
       stateful: True               # giữ lại hướng tốt nhất cuối cùng qua các chu kỳ tick
@@ -227,7 +242,7 @@ local_costmap:
 
       inflation_layer:
         cost_scaling_factor: 3.5     # tốc độ suy giảm mũ của chi phí theo khoảng cách từ vật cản
-        inflation_radius: 0.35        # [m]  bán kính phồng nề quanh vật cản
+        inflation_radius: 0.3        # [m]  bán kính phồng nề quanh vật cản
 
       always_send_full_costmap: True
 
@@ -269,7 +284,7 @@ global_costmap:
 
       inflation_layer:
         cost_scaling_factor: 3.5
-        inflation_radius: 0.35        # [m]
+        inflation_radius: 0.3        # [m]
 
       always_send_full_costmap: True
 
@@ -326,14 +341,14 @@ recoveries_server:
 
     global_frame: odom
     robot_base_frame: base_footprint
-    transform_tolerance: 0.1         # [s]  dung sai TF trong quá trình thực thi phục hồi
+    transform_tolerance: 0.5         # [s]  dung sai TF trong quá trình thực thi phục hồi
 
     simulate_ahead_time: 2.0         # [s]  kiểm tra va chạm tiến trước khi thực thi phục hồi
 
     # Giới hạn bao vận tốc góc áp dụng trong quá trình phục hồi Spin.
-    max_rotational_vel: 1.0          # [rad/s] giới hạn trên
-    min_rotational_vel: 0.4          # [rad/s] giới hạn dưới để thắng ma sát tĩnh
-    rotational_acc_lim: 0.8          # [rad/s²] dốc nhẹ nhàng để giảm nhiễu IMU
+    max_rotational_vel: 0.5          # [rad/s] giới hạn trên
+    min_rotational_vel: 0.3          # [rad/s] giới hạn dưới để thắng ma sát tĩnh
+    rotational_acc_lim: 0.5          # [rad/s²] dốc nhẹ nhàng để giảm nhiễu IMU
 
 
 # ==================== LIFECYCLE MANAGER ====================
