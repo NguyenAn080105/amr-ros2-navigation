@@ -28,15 +28,14 @@ CMD_START_FRAME = 0xABCD
 WHEEL_RADIUS  = 0.08255     # m  (từ URDF)
 WHEEL_BASE    = 0.42109     # m  (wheel_separation)
 
-
 # -----------------------------------------------------------------------------------------
 # 1. GIỚI HẠN PHẦN CỨNG THỰC TẾ CỦA ĐỘNG CƠ (HARDWARE LIMITS)
 # Tốc độ quay tối đa thực tế của động cơ hoverboard (RPM) thiết lập (config) trong STM32 firmware.
 MOTOR_MAX_RPM   = 40.0  
 # Vận tốc góc tối đa của bánh xe (rad/s)
-OMEGA_MAX       = MOTOR_MAX_RPM * 2 * math.pi / 60      # = 4.189 rad/s
+OMEGA_MAX       = MOTOR_MAX_RPM * 2 * math.pi / 60     
 # Vận tốc tịnh tiến tối đa lý thuyết mà hệ thống cơ khí có thể đạt được (m/s)
-V_MAX_HW        = OMEGA_MAX * WHEEL_RADIUS              # = 0.3458 m/s       
+V_MAX_HW        = OMEGA_MAX * WHEEL_RADIUS                   
 
 # -----------------------------------------------------------------------------------------
 # 2. GIỚI HẠN VÀ HỆ SỐ QUY ĐỔI CHO LỆNH ĐIỀU KHIỂN (UART COMMANDS ĐẾN STM32)
@@ -47,20 +46,20 @@ V_MAX_HW        = OMEGA_MAX * WHEEL_RADIUS              # = 0.3458 m/s
 CMD_SCALE_SPEED = 116
 # Hệ số quy đổi lệnh vận tốc góc (xoay) từ ROS (rad/s) sang STM32 (int).
 # CMD_SCALE_STEER = STM32_STEER_MAX / MAX_ANGULAR_VEL
-CMD_SCALE_STEER = 25
+CMD_SCALE_STEER = 24
 
 # Ngưỡng vận tốc tịnh tiến tối đa (Speed) được phép gửi xuống STM32
 # Công thức: STM32_SPEED_MAX = MAX_LINEAR_VEL * CMD_SCALE_SPEED 
-STM32_SPEED_MAX = 40.0
+STM32_SPEED_MAX = 60
 # Ngưỡng vận tốc xoay tối đa (Steer) được phép gửi xuống STM32.
 # Công thức: STM32_STEER_MAX = MAX_ANGULAR_VEL * CMD_SCALE_STEER 
-STM32_STEER_MAX = 40.0
+STM32_STEER_MAX = 60
 
 # -----------------------------------------------------------------------------------------
 # 3. GIỚI HẠN VẬN TỐC PHẦN MỀM (SOFTWARE LIMITS DÀNH CHO NAV2 / BỘ ĐIỀU KHIỂN)
 
 # Vận tốc tịnh tiến tối đa cho phép (m/s)
-MAX_LINEAR_VEL  = 0.346
+MAX_LINEAR_VEL  = 0.5
 # Vận tốc góc tối đa cho phép robot xoay (Yaw) (rad/s)
 # Công thức w = (2 * v_wheel) / wheel_base. 
 MAX_ANGULAR_VEL = 1.643
@@ -217,6 +216,15 @@ class WheelOdomNode(Node):
 
         odom.twist.twist.linear.x = v
         odom.twist.twist.angular.z = w
+
+        # odom.twist.covariance = [
+        # 0.05, 0, 0, 0, 0, 0,   # var(vx)
+        # 0, 1e-6, 0, 0, 0, 0,   # var(vy) ≈ 0 (diff drive)
+        # 0, 0, 1e-6, 0, 0, 0,   # var(vz)
+        # 0, 0, 0, 1e-6, 0, 0,   # var(wx)
+        # 0, 0, 0, 0, 1e-6, 0,   # var(wy)
+        # 0, 0, 0, 0, 0, 0.1,    # var(wz) — yaw rate
+        # ]
 
         self.odom_pub.publish(odom)
 

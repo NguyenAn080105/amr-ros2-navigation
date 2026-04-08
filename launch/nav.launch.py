@@ -53,7 +53,7 @@ def generate_launch_description():
     bno055_config     = os.path.join(pkg_share, 'config', 'bno055_params.yaml')
     wheel_odom_config = os.path.join(pkg_share, 'config', 'wheel_odom_params.yaml')
     filter_config     = os.path.join(pkg_share, 'config', 'laser_filter.yaml')
-    nav2_params       = os.path.join(pkg_share, 'config', 'nav2_params.yaml')
+    nav2_params       = os.path.join(pkg_share, 'config', 'nav2_params_test.yaml')
     default_map       = os.path.join(pkg_share, 'maps',   'lab_demo_map.yaml')
     checkpoint_config = os.path.join(pkg_share, 'config', 'checkpoints.yaml')
 

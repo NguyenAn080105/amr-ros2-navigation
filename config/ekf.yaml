@@ -23,7 +23,7 @@ ekf_filter_node:
     # transform_time_offset / transform_timeout: Dùng để bù trừ độ trễ của hệ thống TF. 
     # Đặt 0.0 là ổn nếu Jetson của bạn xử lý đủ nhanh và đồng bộ thời gian tốt.
     transform_time_offset: 0.0
-    transform_timeout: 0.0
+    transform_timeout: 0.1
     
     # publish_tf: Cho phép EKF node tự động phát tf transform (odom -> base_footprint). 
     # Đặt true là bắt buộc để RViz và Nav2 biết robot đang ở đâu so với điểm xuất phát.
