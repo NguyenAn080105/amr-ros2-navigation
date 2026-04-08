@@ -275,8 +275,8 @@ def generate_launch_description():
     #   /robot/status_message          (std_msgs/String — output)
     checkpoint_navigator_node = Node(
         package='mobile_robot',
-        executable='checkpoint_navigator.py',
-        name='checkpoint_navigator',
+        executable='navigator.py',
+        name='navigator',
         output='screen',
         condition=IfCondition(autostart_navigator),
         parameters=[{

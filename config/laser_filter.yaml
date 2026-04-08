@@ -10,8 +10,8 @@ scan_to_scan_filter_chain:
         invert: false
         min_x: -0.12
         max_x: 0.32
-        min_y: -0.25
-        max_y: 0.25
+        min_y: -0.30
+        max_y: 0.30
         min_z: -0.05
         max_z: 1.40
 
