@@ -10,11 +10,11 @@ amcl:
 
     # Nhiễu mô hình chuyển động odometry (dẫn động vi sai).
     # α1: quay→quay  | α2: tịnh tiến→quay | α3: tịnh tiến→tịnh tiến | α4: quay→tịnh tiến | α5: tịnh tiến→tịnh tiến (trượt ngang)
-    alpha1: 0.1   # nhiễu quay gây ra bởi chuyển động quay
-    alpha2: 0.1   # nhiễu quay gây ra bởi chuyển động tịnh tiến
-    alpha3: 0.1   # nhiễu tịnh tiến gây ra bởi chuyển động tịnh tiến
-    alpha4: 0.1   # nhiễu tịnh tiến gây ra bởi chuyển động quay
-    alpha5: 0.1   # không sử dụng cho dẫn động vi sai
+    alpha1: 0.5   # nhiễu quay gây ra bởi chuyển động quay
+    alpha2: 0.3   # nhiễu quay gây ra bởi chuyển động tịnh tiến
+    alpha3: 0.3   # nhiễu tịnh tiến gây ra bởi chuyển động tịnh tiến
+    alpha4: 0.5   # nhiễu tịnh tiến gây ra bởi chuyển động quay
+    alpha5: 0.3   # không sử dụng cho dẫn động vi sai
 
     base_frame_id: "base_footprint"
 
@@ -61,15 +61,9 @@ amcl:
     update_min_d: 0.1              # [m]   dịch chuyển tuyến tính tối thiểu
 
     # Trọng số hỗn hợp của mô hình cảm biến tia chùm (tổng phải bằng 1.0).
-<<<<<<< HEAD
-    z_hit: 0.85                     # trọng số: mô hình va chạm Gaussian
-    z_max: 0.05                    # trọng số: mô hình lỗi hết tầm đo
-    z_rand: 0.05                    # trọng số: mô hình đo ngẫu nhiên/đồng đều
-=======
     z_hit: 0.7                     # trọng số: mô hình va chạm Gaussian
     z_max: 0.05                    # trọng số: mô hình lỗi hết tầm đo
     z_rand: 0.2                    # trọng số: mô hình đo ngẫu nhiên/đồng đều
->>>>>>> ea10f5d4ee77cdc1bfd2f50122eaa8959ac84174
     z_short: 0.05                  # trọng số: mô hình vật cản bất ngờ cự ly ngắn
 
     scan_topic: /scan_filtered     # dùng scan đã lọc (đã loại bỏ tia phản xạ từ thân robot)
@@ -89,7 +83,7 @@ bt_navigator:
     global_frame: map
     robot_base_frame: base_footprint
     odom_topic: /odometry/filtered   # odometry hợp nhất bằng EKF dùng cho phản hồi vận tốc
-    bt_loop_duration: 5              # [ms] chu kỳ tick của Behavior Tree
+    bt_loop_duration: 10             # [ms] chu kỳ tick của Behavior Tree
     default_server_timeout: 10       # [s]  thời gian chờ gọi action server
     default_bt_xml_filename: "/opt/ros/foxy/share/nav2_bt_navigator/behavior_trees/navigate_w_replanning_and_recovery.xml"
     enable_groot_monitoring: False   # tắt trực quan hóa BT thời gian thực (tiết kiệm CPU)
@@ -149,13 +143,13 @@ controller_server:
       max_vel_x: 0.346             # [m/s] giới hạn vận tốc tiến
       max_vel_y: 0.0               # [m/s] không dịch ngang (dẫn động vi sai)
       max_vel_theta: 1.643         # [rad/s] giới hạn tốc độ góc (≈ giới hạn phần cứng)
-      min_vel_theta: 0.0
+      min_vel_theta: -1.643
       min_speed_xy: 0.0            # [m/s] tốc độ XY kết hợp tối thiểu
       max_speed_xy: 0.346          # [m/s] tốc độ XY kết hợp tối đa
 
       # ── Giới hạn gia tốc / giảm tốc ──────────────────────────────────────
       # Dốc tăng tốc nhẹ nhàng để ngăn trượt bánh và giảm nhiễu rung IMU.
-      acc_lim_x: 0.0865            # [m/s²]  từ 0 lên tối đa trong ≈ 4 s
+      acc_lim_x: 1.73              # [m/s²]  từ 0 lên tối đa trong ≈ 4 s
       acc_lim_y: 0.0               # [m/s²]  dẫn động vi sai
       acc_lim_theta: 1.0           # [rad/s²]
 
