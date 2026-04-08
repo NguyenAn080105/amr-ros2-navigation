@@ -142,7 +142,7 @@ controller_server:
     goal_checker:
       plugin: "nav2_controller::SimpleGoalChecker"
       xy_goal_tolerance: 0.25
-      yaw_goal_tolerance: 0.25
+      yaw_goal_tolerance: 0.15
       stateful: True
 
     controller_plugins: ["FollowPath"]
@@ -155,18 +155,18 @@ controller_server:
       # v_max phần cứng = 0.5 m/s; giảm 30 % vì an toàn → 0.346 m/s
       min_vel_x: 0.0               # [m/s] không điều khiển lùi
       min_vel_y: 0.0               # [m/s] không dịch ngang (dẫn động vi sai)
-      max_vel_x: 0.5               # [m/s] giới hạn vận tốc tiến
+      max_vel_x: 0.6               # [m/s] giới hạn vận tốc tiến
       max_vel_y: 0.0               # [m/s] không dịch ngang (dẫn động vi sai)
-      max_vel_theta: 1.0         # [rad/s] giới hạn tốc độ góc (≈ giới hạn phần cứng)
-      min_vel_theta: -1.0
+      max_vel_theta: 1.5         # [rad/s] giới hạn tốc độ góc (≈ giới hạn phần cứng)
+      min_vel_theta: -1.5
       min_speed_xy: 0.0            # [m/s] tốc độ XY kết hợp tối thiểu
-      max_speed_xy: 0.5            # [m/s] tốc độ XY kết hợp tối đa
+      max_speed_xy: 0.6            # [m/s] tốc độ XY kết hợp tối đa
 
       # ── Giới hạn gia tốc / giảm tốc ──────────────────────────────────────
       # Dốc tăng tốc nhẹ nhàng để ngăn trượt bánh và giảm nhiễu rung IMU.
       acc_lim_x: 0.1              # [m/s²]  từ 0 lên tối đa trong ≈ 4 s
       acc_lim_y: 0.0               # [m/s²]  dẫn động vi sai
-      acc_lim_theta: 1.0           # [rad/s²]
+      acc_lim_theta: 1.15           # [rad/s²]
 
       decel_lim_x: -0.35           # [m/s²]  dốc phanh (gấp 2× gia tốc để dừng chặt hơn)
       decel_lim_y: 0.0
@@ -193,7 +193,7 @@ controller_server:
       # ── Các hàm chấm điểm (critic) ───────────────────────────────────────
       critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
 
-      BaseObstacle.scale: 60.0               # phạt khi tiếp cận vật cản chết người/phồng nề
+      BaseObstacle.scale: 80.0               # phạt khi tiếp cận vật cản chết người/phồng nề
       PathAlign.scale: 24.0                  # phạt khi lệch hướng so với đường dẫn toàn cục
       PathAlign.forward_point_distance: 0.4  # [m] khoảng cách nhìn trước để chấm điểm căn chỉnh đường dẫn
       GoalAlign.scale: 12.0                  # phạt khi lệch hướng so với hướng đến đích
@@ -223,7 +223,7 @@ local_costmap:
       resolution: 0.05               # [m/ô lưới]
       footprint_padding: 0.01
       # Đa giác footprint của robot trong frame base_footprint [trước→sau, trái→phải].
-      footprint: "[[0.32, 0.30], [0.32, -0.30], [-0.12, -0.31], [-0.12, 0.31]]"
+      footprint: "[[0.35, 0.32], [0.35, -0.32], [-0.14, -0.32], [-0.14, 0.32]]"
       robot_base_frame: base_footprint
       update_frequency: 20.0         # [Hz] phải khớp với controller_frequency
       publish_frequency: 5.0         # [Hz] tần suất cập nhật RViz
@@ -237,14 +237,14 @@ local_costmap:
           clearing: True             # truy vết tia để xóa vùng trống phía sau tia rõ ràng
           marking: True              # đánh dấu ô bị chiếm khi có tia phản xạ
           data_type: "LaserScan"
-          raytrace_max_range: 5.5    # [m]  khoảng cách xóa vùng trống tối đa
+          raytrace_max_range: 10.5    # [m]  khoảng cách xóa vùng trống tối đa
           raytrace_min_range: 0.0
-          obstacle_max_range: 5.0    # [m]  khoảng cách đánh dấu vật cản tối đa
+          obstacle_max_range: 10.0    # [m]  khoảng cách đánh dấu vật cản tối đa
           obstacle_min_range: 0.0
 
       inflation_layer:
         cost_scaling_factor: 2.2     # tốc độ suy giảm mũ của chi phí theo khoảng cách từ vật cản
-        inflation_radius: 0.22        # [m]  bán kính phồng nề quanh vật cản
+        inflation_radius: 0.37        # [m]  bán kính phồng nề quanh vật cản
 
       always_send_full_costmap: True
 
@@ -255,7 +255,7 @@ global_costmap:
     ros__parameters:
       use_sim_time: False
       global_frame: map              # neo vào frame bản đồ tĩnh
-      footprint: "[[0.32, 0.30], [0.32, -0.30], [-0.12, -0.30], [-0.12, 0.30]]"
+      footprint: "[[0.35, 0.32], [0.35, -0.32], [-0.14, -0.32], [-0.14, 0.32]]"
       resolution: 0.05               # [m/ô lưới]
       footprint_padding: 0.01
       robot_base_frame: base_footprint
@@ -280,14 +280,14 @@ global_costmap:
           clearing: True
           marking: True
           data_type: "LaserScan"
-          raytrace_max_range: 10.5   # [m]  phạm vi xóa vùng trống rộng hơn trên bản đồ toàn cục
+          raytrace_max_range: 14.5   # [m]  phạm vi xóa vùng trống rộng hơn trên bản đồ toàn cục
           raytrace_min_range: 0.0
-          obstacle_max_range: 10.0   # [m]  phạm vi đánh dấu vật cản rộng hơn trên bản đồ toàn cục
+          obstacle_max_range: 14.0   # [m]  phạm vi đánh dấu vật cản rộng hơn trên bản đồ toàn cục
           obstacle_min_range: 0.0
 
       inflation_layer:
         cost_scaling_factor: 3.5
-        inflation_radius: 0.2        # [m]
+        inflation_radius: 0.37       # [m]
 
       always_send_full_costmap: True
 

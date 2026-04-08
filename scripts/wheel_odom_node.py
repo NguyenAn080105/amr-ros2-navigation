@@ -50,7 +50,7 @@ CMD_SCALE_STEER = 24
 
 # Ngưỡng vận tốc tịnh tiến tối đa (Speed) được phép gửi xuống STM32
 # Công thức: STM32_SPEED_MAX = MAX_LINEAR_VEL * CMD_SCALE_SPEED 
-STM32_SPEED_MAX = 60
+STM32_SPEED_MAX = 70
 # Ngưỡng vận tốc xoay tối đa (Steer) được phép gửi xuống STM32.
 # Công thức: STM32_STEER_MAX = MAX_ANGULAR_VEL * CMD_SCALE_STEER 
 STM32_STEER_MAX = 60
@@ -59,10 +59,10 @@ STM32_STEER_MAX = 60
 # 3. GIỚI HẠN VẬN TỐC PHẦN MỀM (SOFTWARE LIMITS DÀNH CHO NAV2 / BỘ ĐIỀU KHIỂN)
 
 # Vận tốc tịnh tiến tối đa cho phép (m/s)
-MAX_LINEAR_VEL  = 0.5
+MAX_LINEAR_VEL  = 0.6
 # Vận tốc góc tối đa cho phép robot xoay (Yaw) (rad/s)
 # Công thức w = (2 * v_wheel) / wheel_base. 
-MAX_ANGULAR_VEL = 1.643
+MAX_ANGULAR_VEL = 1.5
 
 
 class WheelOdomNode(Node):
@@ -70,7 +70,7 @@ class WheelOdomNode(Node):
         super().__init__('wheel_odom_node')
 
         # 1. Parameters
-        self.declare_parameter('serial_port', '/dev/ttyUSB0')
+        self.declare_parameter('serial_port', '/dev/ttyUSB1')
         self.declare_parameter('baud_rate', 115200)
         self.declare_parameter('publish_tf', False) # EKF sẽ lo việc này
         
@@ -299,3 +299,4 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+ 
