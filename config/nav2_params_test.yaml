@@ -166,7 +166,7 @@ controller_server:
       # Dốc tăng tốc nhẹ nhàng để ngăn trượt bánh và giảm nhiễu rung IMU.
       acc_lim_x: 0.1              # [m/s²]  từ 0 lên tối đa trong ≈ 4 s
       acc_lim_y: 0.0               # [m/s²]  dẫn động vi sai
-      acc_lim_theta: 1.25           # [rad/s²]
+      acc_lim_theta: 1.643           # [rad/s²]
 
       decel_lim_x: -0.35           # [m/s²]  dốc phanh (gấp 2× gia tốc để dừng chặt hơn)
       decel_lim_y: 0.0
@@ -195,7 +195,7 @@ controller_server:
       # ── Các hàm chấm điểm (critic) ───────────────────────────────────────
       critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
 
-      BaseObstacle.scale: 50.0               # phạt khi tiếp cận vật cản chết người/phồng nề
+      BaseObstacle.scale: 60.0               # phạt khi tiếp cận vật cản chết người/phồng nề
       PathAlign.scale: 24.0                  # phạt khi lệch hướng so với đường dẫn toàn cục
       PathAlign.forward_point_distance: 0.3  # [m] khoảng cách nhìn trước để chấm điểm căn chỉnh đường dẫn
       GoalAlign.scale: 12.0                  # phạt khi lệch hướng so với hướng đến đích

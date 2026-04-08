@@ -53,7 +53,7 @@ CMD_SCALE_STEER = 24
 STM32_SPEED_MAX = 60
 # Ngưỡng vận tốc xoay tối đa (Steer) được phép gửi xuống STM32.
 # Công thức: STM32_STEER_MAX = MAX_ANGULAR_VEL * CMD_SCALE_STEER 
-STM32_STEER_MAX = 40
+STM32_STEER_MAX = 60
 
 # -----------------------------------------------------------------------------------------
 # 3. GIỚI HẠN VẬN TỐC PHẦN MỀM (SOFTWARE LIMITS DÀNH CHO NAV2 / BỘ ĐIỀU KHIỂN)
