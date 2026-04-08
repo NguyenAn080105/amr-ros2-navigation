@@ -33,9 +33,9 @@ WHEEL_BASE    = 0.42109     # m  (wheel_separation)
 # Tốc độ quay tối đa thực tế của động cơ hoverboard (RPM) thiết lập (config) trong STM32 firmware.
 MOTOR_MAX_RPM   = 40.0  
 # Vận tốc góc tối đa của bánh xe (rad/s)
-OMEGA_MAX       = MOTOR_MAX_RPM * 2 * math.pi / 60      # = 4.189 rad/s
+OMEGA_MAX       = MOTOR_MAX_RPM * 2 * math.pi / 60     
 # Vận tốc tịnh tiến tối đa lý thuyết mà hệ thống cơ khí có thể đạt được (m/s)
-V_MAX_HW        = OMEGA_MAX * WHEEL_RADIUS              # = 0.3458 m/s       
+V_MAX_HW        = OMEGA_MAX * WHEEL_RADIUS                   
 
 # -----------------------------------------------------------------------------------------
 # 2. GIỚI HẠN VÀ HỆ SỐ QUY ĐỔI CHO LỆNH ĐIỀU KHIỂN (UART COMMANDS ĐẾN STM32)
