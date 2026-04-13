@@ -1,50 +1,38 @@
 checkpoints:
-  - display_name: Home
+  - display_name: Meeting Room (E1.1)
     id: 0
-    name: home
+    name: meeting_room_e1_1
     orientation:
-      w: 0.0565954
+      w: 0.997132
       x: 0.0
       y: 0.0
-      z: -0.998397
+      z: 0.0756878
     position:
-      x: -4.92672
-      y: -1.98316
+      x: -15.2248
+      y: -2.85956
       z: 0.0
   - display_name: Elevator
     id: 1
     name: elevator
     orientation:
-      w: 0.77645
+      w: 0.772493
       x: 0.0
       y: 0.0
-      z: -0.630179
+      z: -0.635023
     position:
-      x: -8.45365
-      y: 2.32087
-      z: 0.0
-  - display_name: Meeting Room (E1.1)
-    id: 2
-    name: meeting_room_e1_1
-    orientation:
-      w: 0.996397
-      x: 0.0
-      y: 0.0
-      z: 0.084813
-    position:
-      x: -15.6798
-      y: -2.5647
+      x: -8.43639
+      y: 2.17993
       z: 0.0
   - display_name: CELUiT's Office
     id: 3
     name: celuit_office
     orientation:
-      w: 0.657793
+      w: 0.665954
       x: 0.0
       y: 0.0
-      z: 0.753199
+      z: 0.745993
     position:
-      x: 6.92445
-      y: -0.0202467
+      x: 5.17644
+      y: -0.0192742
       z: 0.0
 frame_id: map
