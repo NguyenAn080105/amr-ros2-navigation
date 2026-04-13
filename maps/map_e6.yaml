@@ -1,4 +1,4 @@
-image: lab_demo_map.pgm
+image: map_e6.pgm
 mode: trinary
 resolution: 0.03
 origin: [-7.9, -11.4, 0]
