@@ -24,7 +24,7 @@
 #   ros2 launch mobile_robot nav_launch.py map:=/home/<user>/maps/my_map.yaml
 #
 # Run with Checkpoint Navigator:
-#   ros2 launch mobile_robot nav_launch.py autostart_navigator:=true
+#   ros2 launch mobile_robot nav.launch.py autostart_navigator:=true
 # ──────────────────────────────────────────────────────────────────────────────
 
 import os
