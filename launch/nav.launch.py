@@ -24,7 +24,7 @@
 #   ros2 launch mobile_robot nav_launch.py map:=/home/<user>/maps/my_map.yaml
 #
 # Run with Checkpoint Navigator:
-#   ros2 launch mobile_robot nav.launch.py autostart_navigator:=true
+#   ros2 launch mobile_robot nav_launch.py autostart_navigator:=true
 # ──────────────────────────────────────────────────────────────────────────────
 
 import os
@@ -54,7 +54,7 @@ def generate_launch_description():
     wheel_odom_config = os.path.join(pkg_share, 'config', 'wheel_odom_params.yaml')
     filter_config     = os.path.join(pkg_share, 'config', 'laser_filter.yaml')
     nav2_params       = os.path.join(pkg_share, 'config', 'nav2_params_test.yaml')
-    default_map       = os.path.join(pkg_share, 'maps',   'lab_demo_map.yaml')
+    # default_map       = os.path.join(pkg_share, 'maps',   'lab_demo_map.yaml')
     checkpoint_config = os.path.join(pkg_share, 'config', 'checkpoints.yaml')
 
     # ── Launch arguments ───────────────────────────────────────────────────────
@@ -64,10 +64,16 @@ def generate_launch_description():
         description='Use simulation (Gazebo) clock if true. Must be false on physical hardware.'
     )
 
-    declare_map = DeclareLaunchArgument(
-        'map',
-        default_value=default_map,
-        description='Full path to the occupancy grid map .yaml file.'
+    # declare_map = DeclareLaunchArgument(
+    #     'map',
+    #     default_value=default_map,
+    #     description='Full path to the occupancy grid map .yaml file.'
+    # )
+
+    declare_floor = DeclareLaunchArgument(
+        'floor',
+        default_value='e6',
+        description='Floor identifier (e.g., e6, e1)'
     )
 
     declare_autostart_navigator = DeclareLaunchArgument(
@@ -83,9 +89,18 @@ def generate_launch_description():
     )
 
     use_sim_time        = LaunchConfiguration('use_sim_time')
-    map_file            = LaunchConfiguration('map')
+    # map_file            = LaunchConfiguration('map')
+    floor = LaunchConfiguration('floor')
     autostart_navigator = LaunchConfiguration('autostart_navigator')
     timeout             = LaunchConfiguration('timeout_at_checkpoint')
+
+    dynamic_map_file = PathJoinSubstitution([
+        pkg_share, 'maps', ['map_', floor, '.yaml']  # Result: .../maps/map_e6.yaml
+    ])
+
+    dynamic_checkpoint_file = PathJoinSubstitution([
+        pkg_share, 'config', ['checkpoints_', floor, '.yaml']  # Result: .../config/checkpoints_e6.yaml
+    ])
 
     # ══════════════════════════════════════════════════════════════════════════
     # NODE 1 — Robot State Publisher                                    [t = 0s]
@@ -98,7 +113,7 @@ def generate_launch_description():
         parameters=[{
             'use_sim_time':      use_sim_time,
             'robot_description': Command(['xacro ', urdf_file]),
-            'publish_frequency': 50.0,   # SYNC: khớp EKF 50Hz — TF base_link→sensors phải mới nhất
+            'publish_frequency': 50.0,
         }]
     )
 
@@ -248,7 +263,7 @@ def generate_launch_description():
             os.path.join(pkg_nav2_bringup, 'launch', 'bringup_launch.py')
         ),
         launch_arguments={
-            'map':          map_file,
+            'map':          dynamic_map_file,
             'use_sim_time': use_sim_time,
             'params_file':  nav2_params,
         }.items()
@@ -281,7 +296,7 @@ def generate_launch_description():
         condition=IfCondition(autostart_navigator),
         parameters=[{
             'use_sim_time':          use_sim_time,
-            'checkpoint_file':       checkpoint_config,
+            'checkpoint_file':       dynamic_checkpoint_file,
             'timeout_at_checkpoint': timeout,
             'home_checkpoint_id':    0,
             'goal_tolerance':        0.25,

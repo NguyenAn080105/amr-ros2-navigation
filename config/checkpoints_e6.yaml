@@ -1,0 +1,50 @@
+checkpoints:
+  - display_name: LAB Room
+    id: 0
+    name: lab_room
+    orientation:
+      w: 0.983198
+      x: 0.0
+      y: 0.0
+      z: -0.182543
+    position:
+      x: -3.68845
+      y: 1.26464
+      z: 0.0
+  - display_name: Elevator
+    id: 1
+    name: elevator
+    orientation:
+      w: 0.980366
+      x: 0.0
+      y: 0.0
+      z: -0.197188
+    position:
+      x: -4.58081
+      y: 6.86594
+      z: 0.0
+  - display_name: Meeting Room (E6.3)
+    id: 2
+    name: meeting_room_e6_3
+    orientation:
+      w: 0.980791
+      x: 0.0
+      y: 0.0
+      z: -0.195061
+    position:
+      x: 2.87544
+      y: 17.0863
+      z: 0.0
+  - display_name: Dean's Room
+    id: 3
+    name: dean_room
+    orientation:
+      w: 0.976300
+      x: 0.0
+      y: 0.0
+      z: -0.216423
+    position:
+      x: 4.74884
+      y: 24.1099
+      z: 0.0
+frame_id: map
