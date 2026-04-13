@@ -19,9 +19,11 @@
 #   export ROS_DOMAIN_ID=42
 #   export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 #
-# Run local with default/available map  :
+# Run local with default area (floor e6) :
 #   ros2 launch mobile_robot nav_launch.py
-#   ros2 launch mobile_robot nav_launch.py map:=/home/<user>/maps/my_map.yaml
+#
+# Run for a specific floor (e.g., e1) :
+#   ros2 launch mobile_robot nav_launch.py floor:=e1
 #
 # Run with Checkpoint Navigator:
 #   ros2 launch mobile_robot nav_launch.py autostart_navigator:=true
@@ -38,7 +40,7 @@ from launch.actions import (
 )
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, Command
+from launch.substitutions import LaunchConfiguration, Command, PathJoinSubstitution
 from launch_ros.actions import Node
 
 
@@ -55,7 +57,6 @@ def generate_launch_description():
     filter_config     = os.path.join(pkg_share, 'config', 'laser_filter.yaml')
     nav2_params       = os.path.join(pkg_share, 'config', 'nav2_params_test.yaml')
     # default_map       = os.path.join(pkg_share, 'maps',   'lab_demo_map.yaml')
-    checkpoint_config = os.path.join(pkg_share, 'config', 'checkpoints.yaml')
 
     # ── Launch arguments ───────────────────────────────────────────────────────
     declare_use_sim_time = DeclareLaunchArgument(
@@ -78,7 +79,7 @@ def generate_launch_description():
 
     declare_autostart_navigator = DeclareLaunchArgument(
         'autostart_navigator',
-        default_value='false',
+        default_value='true',
         description='Automatically start the CheckpointNavigator node after Nav2 is ready.'
     )
 
@@ -94,13 +95,13 @@ def generate_launch_description():
     autostart_navigator = LaunchConfiguration('autostart_navigator')
     timeout             = LaunchConfiguration('timeout_at_checkpoint')
 
-    dynamic_map_file = PathJoinSubstitution([
-        pkg_share, 'maps', ['map_', floor, '.yaml']  # Result: .../maps/map_e6.yaml
-    ])
+    dynamic_map_file = [
+        pkg_share, '/maps/map_', floor, '.yaml'
+    ]
 
-    dynamic_checkpoint_file = PathJoinSubstitution([
-        pkg_share, 'config', ['checkpoints_', floor, '.yaml']  # Result: .../config/checkpoints_e6.yaml
-    ])
+    dynamic_checkpoint_file = [
+        pkg_share, '/config/checkpoints_', floor, '.yaml'
+    ]
 
     # ══════════════════════════════════════════════════════════════════════════
     # NODE 1 — Robot State Publisher                                    [t = 0s]
@@ -212,6 +213,8 @@ def generate_launch_description():
         executable='sllidar_node',
         name='sllidar_node',
         output='screen',
+        respawn=True,               # ← tự restart khi chết
+        respawn_delay=3.0,          # ← chờ 3s trước khi restart
         parameters=[{
             'channel_type':     'udp',
             'udp_ip':           '192.168.11.2',
@@ -300,6 +303,8 @@ def generate_launch_description():
             'timeout_at_checkpoint': timeout,
             'home_checkpoint_id':    0,
             'goal_tolerance':        0.25,
+            'enable_pre_rotate': True,
+            'pre_rotate_angle_threshold': 1.0
         }]
     )
 
@@ -316,7 +321,8 @@ def generate_launch_description():
     # ══════════════════════════════════════════════════════════════════════════
     return LaunchDescription([
         declare_use_sim_time,
-        declare_map,
+        # declare_map,
+        declare_floor,
         declare_autostart_navigator,
         declare_timeout,
 

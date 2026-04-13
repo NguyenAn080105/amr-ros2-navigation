@@ -1,50 +1,68 @@
 checkpoints:
-  - display_name: LAB Room
+  # ---------------------------------------------------------
+  # ID: 0 - Điểm xuất phát / Về đích
+  # ---------------------------------------------------------
+  checkpoint_0:
     id: 0
-    name: lab_room
+    name: "LAB Room"
+    position:
+      x: -0.0202527
+      y: -0.00167704
+      z: 0.0
     orientation:
-      w: 0.983198
       x: 0.0
       y: 0.0
-      z: -0.182543
-    position:
-      x: -3.68845
-      y: 1.26464
-      z: 0.0
-  - display_name: Elevator
+      z: 0.978639
+      w: 0.205588
+    yaw: 2.72746
+
+  # ---------------------------------------------------------
+  # ID: 1 - Thang máy
+  # ---------------------------------------------------------
+  checkpoint_1:
     id: 1
-    name: elevator
+    name: "Elevator"
+    position:
+      x: -4.14317
+      y: 6.6751
+      z: 0.0
     orientation:
-      w: 0.980366
       x: 0.0
       y: 0.0
-      z: -0.197188
-    position:
-      x: -4.58081
-      y: 6.86594
-      z: 0.0
-  - display_name: Meeting Room (E6.3)
+      z: -0.196155
+      w: 0.980573
+    yaw: -0.39487
+
+  # ---------------------------------------------------------
+  # ID: 2 - Phòng họp tầng 6
+  # ---------------------------------------------------------
+  checkpoint_2:
     id: 2
-    name: meeting_room_e6_3
+    name: "Meeting Room (E6.3)"
+    position:
+      x: 3.19687
+      y: 17.2911
+      z: 0.0
     orientation:
-      w: 0.980791
       x: 0.0
       y: 0.0
-      z: -0.195061
-    position:
-      x: 2.87544
-      y: 17.0863
-      z: 0.0
-  - display_name: Dean's Room
+      z: -0.188643
+      w: 0.982046
+    yaw: -0.37956
+
+  # ---------------------------------------------------------
+  # ID: 3 - Phòng Trưởng khoa
+  # ---------------------------------------------------------
+  checkpoint_3:
     id: 3
-    name: dean_room
+    name: "Dean's Room"
+    position:
+      x: 5.02712
+      y: 23.8103
+      z: 0.0
     orientation:
-      w: 0.976300
       x: 0.0
       y: 0.0
-      z: -0.216423
-    position:
-      x: 4.74884
-      y: 24.1099
-      z: 0.0
-frame_id: map
+      z: -0.204722
+      w: 0.97882
+    yaw: -0.412359
