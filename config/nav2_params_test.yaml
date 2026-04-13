@@ -128,7 +128,7 @@ controller_server:
     # Ngưỡng vận tốc dưới mức robot được coi là đứng yên.
     min_x_velocity_threshold: 0.001  # [m/s]
     min_y_velocity_threshold: 0.001  # [m/s] (không dùng — dẫn động vi sai)
-    min_theta_velocity_threshold: 0.001 # [rad/s]
+    min_theta_velocity_threshold: 0.05 # [rad/s]
 
     # FIX: Thêm progress_checker để tuning timeout "Failed to make progress"
     progress_checker_plugin: "progress_checker"
@@ -142,7 +142,7 @@ controller_server:
     goal_checker:
       plugin: "nav2_controller::SimpleGoalChecker"
       xy_goal_tolerance: 0.25
-      yaw_goal_tolerance: 0.15
+      yaw_goal_tolerance: 0.2
       stateful: True
 
     controller_plugins: ["FollowPath"]
@@ -157,8 +157,9 @@ controller_server:
       min_vel_y: 0.0               # [m/s] không dịch ngang (dẫn động vi sai)
       max_vel_x: 0.6               # [m/s] giới hạn vận tốc tiến
       max_vel_y: 0.0               # [m/s] không dịch ngang (dẫn động vi sai)
-      max_vel_theta: 1.5         # [rad/s] giới hạn tốc độ góc (≈ giới hạn phần cứng)
-      min_vel_theta: -1.5
+      max_vel_theta: 1.5           # [rad/s] giới hạn tốc độ góc (≈ giới hạn phần cứng)
+      min_vel_theta: -1.5          # [rad/s] giới hạn tốc độ góc ngược (≈ giới hạn phần cứng)
+      min_speed_theta: 0.25        # [rad/s] tốc độ góc tối thiểu để thắng ma sát tĩnh và xoay tại chỗ
       min_speed_xy: 0.0            # [m/s] tốc độ XY kết hợp tối thiểu
       max_speed_xy: 0.6            # [m/s] tốc độ XY kết hợp tối đa
 
@@ -166,11 +167,11 @@ controller_server:
       # Dốc tăng tốc nhẹ nhàng để ngăn trượt bánh và giảm nhiễu rung IMU.
       acc_lim_x: 0.1              # [m/s²]  từ 0 lên tối đa trong ≈ 4 s
       acc_lim_y: 0.0               # [m/s²]  dẫn động vi sai
-      acc_lim_theta: 1.15           # [rad/s²]
+      acc_lim_theta: 1.0           # [rad/s²]
 
       decel_lim_x: -0.35           # [m/s²]  dốc phanh (gấp 2× gia tốc để dừng chặt hơn)
       decel_lim_y: 0.0
-      decel_lim_theta: -1.25      # [rad/s²]
+      decel_lim_theta: -1.0      # [rad/s²]
 
       # ── Lấy mẫu quỹ đạo ──────────────────────────────────────────────────
       vx_samples: 15               # số mẫu vận tốc tuyến tính trong cửa sổ động
@@ -188,7 +189,7 @@ controller_server:
 
       # ── Dung sai đích ────────────────────────────────────────────────────
       xy_goal_tolerance: 0.25      # [m]   dung sai vị trí tại đích
-      yaw_goal_tolerance: 0.25     # [rad] dung sai góc tại đích (~14°)
+      yaw_goal_tolerance: 0.2     # [rad] dung sai góc tại đích (~10 độ)
 
       # ── Các hàm chấm điểm (critic) ───────────────────────────────────────
       critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
@@ -349,9 +350,9 @@ recoveries_server:
     simulate_ahead_time: 2.0         # [s]  kiểm tra va chạm tiến trước khi thực thi phục hồi
 
     # Giới hạn bao vận tốc góc áp dụng trong quá trình phục hồi Spin.
-    max_rotational_vel: 0.2          # [rad/s] giới hạn trên
-    min_rotational_vel: 0.1          # [rad/s] giới hạn dưới để thắng ma sát tĩnh
-    rotational_acc_lim: 0.3          # [rad/s²] dốc nhẹ nhàng để giảm nhiễu IMU
+    max_rotational_vel: 0.6          # [rad/s] giới hạn trên
+    min_rotational_vel: 0.3          # [rad/s] giới hạn dưới để thắng ma sát tĩnh
+    rotational_acc_lim: 0.4          # [rad/s²] dốc nhẹ nhàng để giảm nhiễu IMU
 
 
 # ==================== LIFECYCLE MANAGER ====================
