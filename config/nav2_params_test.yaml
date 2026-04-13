@@ -350,9 +350,9 @@ recoveries_server:
     simulate_ahead_time: 2.0         # [s]  kiểm tra va chạm tiến trước khi thực thi phục hồi
 
     # Giới hạn bao vận tốc góc áp dụng trong quá trình phục hồi Spin.
-    max_rotational_vel: 0.6          # [rad/s] giới hạn trên
-    min_rotational_vel: 0.3          # [rad/s] giới hạn dưới để thắng ma sát tĩnh
-    rotational_acc_lim: 0.4          # [rad/s²] dốc nhẹ nhàng để giảm nhiễu IMU
+    max_rotational_vel: 1.0          # [rad/s] giới hạn tốc độ góc tối đa trong quá trình phục hồi Spin
+    min_rotational_vel: 0.4          # [rad/s] giới hạn tốc độ góc tối thiểu để thắng ma sát tĩnh và xoay tại chỗ trong quá trình phục hồi Spin
+    rotational_acc_lim: 0.8          # [rad/s²] giới hạn gia tốc góc trong quá trình phục hồi Spin
 
 
 # ==================== LIFECYCLE MANAGER ====================
