@@ -4,7 +4,7 @@
 ekf_filter_node:
   ros__parameters:
     # frequency: Tần số hoạt động của bộ lọc EKF (Hz). 
-    frequency: 50.0
+    frequency: 40.0
     
     # sensor_timeout: Thời gian (giây) tối đa chờ dữ liệu từ cảm biến. 
     # Nếu trong 0.2s không nhận được data từ odom hoặc imu, filter sẽ tiếp tục dự đoán (predict) mà không có bước cập nhật (update).
