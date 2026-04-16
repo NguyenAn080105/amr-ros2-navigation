@@ -304,7 +304,7 @@ def generate_launch_description():
             'home_checkpoint_id':    0,
             'goal_tolerance':        0.25,
             'enable_pre_rotate': True,
-            'pre_rotate_angle_threshold': 1.0
+            'pre_rotate_angle_threshold': 0.4,  # radians
         }]
     )
 
