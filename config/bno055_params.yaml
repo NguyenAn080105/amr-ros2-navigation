@@ -6,8 +6,7 @@ bno055:
     i2c_addr: 0x28               # ADR=GND: 0x28 | ADR=VCC: 0x29
     
     # Operation mode: NDOF (full 9-DOF fusion)
-    operation_mode: 0x08         # NDOF mode - Fusion không có Magnetometer dành cho Robot trong nhà (tránh nhiễu từ)
-    
+    operation_mode: 0x08         # accel + gyro (- magnetometer fusion)
     # Frame IDs
     frame_id: "imu_link"
     
