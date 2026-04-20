@@ -1,0 +1,4 @@
+# Session logs — không push tự động
+logs/*.log
+logs/*.txt
+!logs/.gitkeep

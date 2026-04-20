@@ -37,10 +37,11 @@ from launch.actions import (
     IncludeLaunchDescription,
     TimerAction,
     LogInfo,
+    ExecuteProcess,
 )
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, Command, PathJoinSubstitution
+from launch.substitutions import LaunchConfiguration, Command
 from launch_ros.actions import Node
 
 
@@ -57,6 +58,7 @@ def generate_launch_description():
     filter_config     = os.path.join(pkg_share, 'config', 'laser_filter.yaml')
     nav2_params       = os.path.join(pkg_share, 'config', 'nav2_params_test.yaml')
     # default_map       = os.path.join(pkg_share, 'maps',   'lab_demo_map.yaml')
+    session_logger    = os.path.join(pkg_share, 'scripts', 'session_logger.py')
 
     # ── Launch arguments ───────────────────────────────────────────────────────
     declare_use_sim_time = DeclareLaunchArgument(
@@ -102,6 +104,25 @@ def generate_launch_description():
     dynamic_checkpoint_file = [
         pkg_share, '/config/checkpoints_', floor, '.yaml'
     ]
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # NODE 0 — Session Logger                                          [t = 0s]
+    # Write structured log to ~/robot_logs/session_YYYY-MM-DD_HH-MM-SS.log
+    # ══════════════════════════════════════════════════════════════════════════
+    session_logger_node = Node(
+        package='mobile_robot',
+        executable='session_logger.py',
+        name='session_logger',
+        output='screen',
+        parameters=[{
+            'use_sim_time': use_sim_time,
+            # 'log_dir': os.path.expanduser('~/robot_logs'),
+            'log_dir': os.path.join(
+                os.path.expanduser('~'),
+                'mbrobot_ws', 'src', 'mobile_robot', 'logs'
+            ),
+        }]
+    )
 
     # ══════════════════════════════════════════════════════════════════════════
     # NODE 1 — Robot State Publisher                                    [t = 0s]
@@ -280,6 +301,24 @@ def generate_launch_description():
         ]
     )
 
+    set_initial_pose = ExecuteProcess(
+        cmd=[
+            'ros2', 'topic', 'pub', '--once',
+            '/initialpose',
+            'geometry_msgs/msg/PoseWithCovarianceStamped',
+            '{"header": {"frame_id": "map"}, "pose": {"pose": {"position": {"x": -4.047, "y": -7.508, "z": 0.0}, "orientation": {"x": 0.0, "y": 0.0, "z": -0.1701, "w": 0.9854}}, "covariance": [0.25,0,0,0,0,0,0,0.25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.068]}}'
+        ],
+        output='screen'
+    )
+
+    delayed_initial_pose = TimerAction(
+        period=15.0,
+        actions=[
+            LogInfo(msg='[nav] [15.0s] Publishing initial pose to AMCL...'),
+            set_initial_pose,
+        ]
+    )
+
     # ══════════════════════════════════════════════════════════════════════════
     # NODE 10 — Checkpoint Navigator  (optional)                      [t = 15s]
     # ══════════════════════════════════════════════════════════════════════════
@@ -302,14 +341,11 @@ def generate_launch_description():
             'checkpoint_file':       dynamic_checkpoint_file,
             'timeout_at_checkpoint': timeout,
             'home_checkpoint_id':    0,
-            'goal_tolerance':        0.25,
-            'enable_pre_rotate': True,
-            'pre_rotate_angle_threshold': 0.4,  # radians
         }]
     )
 
     delayed_checkpoint_nav = TimerAction(
-        period=15.0,
+        period=20.0,
         actions=[
             LogInfo(msg='[nav] Starting checkpoint_navigator...'),
             checkpoint_navigator_node,
@@ -328,6 +364,7 @@ def generate_launch_description():
 
         LogInfo(msg='[nav] ═══ Starting Full Hardware Bringup + EKF + Nav2 ═══'),
         LogInfo(msg='[nav] [0.0s] Starting RSP, wheel_odom, bno055, lidar...'),
+        session_logger_node,
         robot_state_publisher,
         wheel_odom_node,
         bno055_node,
@@ -338,5 +375,6 @@ def generate_launch_description():
         delayed_ekf,
         delayed_scan_filter,
         delayed_nav2,
+        delayed_initial_pose,
         delayed_checkpoint_nav,
     ])

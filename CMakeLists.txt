@@ -38,6 +38,7 @@ install(
     scripts/robot_teleop.py
     scripts/navigator.py
     scripts/checkpoint_cmd.py
+    scripts/session_logger.py
   DESTINATION lib/${PROJECT_NAME}
 )
 # ── Install launch files ────────────────────────────────────────────────────────
