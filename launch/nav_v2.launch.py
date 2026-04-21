@@ -51,7 +51,7 @@ def generate_launch_description():
     pkg_share        = get_package_share_directory(package_name)
     pkg_nav2_bringup = get_package_share_directory('nav2_bringup')
 
-    urdf_file         = os.path.join(pkg_share, 'urdf',   'mobile_robot.urdf.xacro')
+    urdf_file         = os.path.join(pkg_share, 'urdf',   'mobile_robot_v2.urdf.xacro')
     ekf_config        = os.path.join(pkg_share, 'config', 'ekf.yaml')
     bno055_config     = os.path.join(pkg_share, 'config', 'bno055_params.yaml')
     wheel_odom_config = os.path.join(pkg_share, 'config', 'wheel_odom_params.yaml')
@@ -138,6 +138,16 @@ def generate_launch_description():
             'publish_frequency': 50.0,
         }]
     )
+
+    # ====================== ULTRASONIC FUSION ======================
+    ultrasonic_fusion = Node(
+        package='mobile_robot',
+        executable='ultrasonic_fusion_node.py',
+        name='ultrasonic_fusion_node',
+        output='screen',
+        parameters=[{'use_sim_time': use_sim_time}]
+    )
+    delayed_ultrasonic_fusion = TimerAction(period=3.0, actions=[ultrasonic_fusion])
 
     # ══════════════════════════════════════════════════════════════════════════
     # NODE 2 — Joint State Publisher                                  [t = 1.5s]
@@ -372,7 +382,7 @@ def generate_launch_description():
         wheel_odom_node,
         bno055_node,
         lidar_node,
-
+        delayed_ultrasonic_fusion,
         delayed_jsp,
         delayed_imu_reader,
         delayed_ekf,

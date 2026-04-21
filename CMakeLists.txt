@@ -32,13 +32,16 @@ install(PROGRAMS scripts/imu_reader.py
 install(PROGRAMS scripts/wheel_odom_node.py
   DESTINATION lib/${PROJECT_NAME}
   RENAME wheel_odom_node)
-
+install(PROGRAMS scripts/jetson_sensor_bridge.py
+  DESTINATION lib/${PROJECT_NAME}
+  RENAME jetson_sensor_bridge)
 install(
   PROGRAMS
     scripts/robot_teleop.py
     scripts/navigator.py
     scripts/checkpoint_cmd.py
     scripts/session_logger.py
+    scripts/ultrasonic_fusion_node.py
   DESTINATION lib/${PROJECT_NAME}
 )
 # ── Install launch files ────────────────────────────────────────────────────────
