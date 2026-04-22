@@ -79,7 +79,6 @@ class State(Enum):
     EMERGENCY_STOP = "EMERGENCY_STOP"
     RETURNING_HOME = "RETURNING_HOME"
 
-
 class CheckpointNavigator(Node):
 
     def __init__(self):
@@ -104,6 +103,7 @@ class CheckpointNavigator(Node):
         self.target_cp    = None
         self.goal_handle  = None
         self.arrival_time = None
+        self._is_returning_home = False   
 
         # Pre-rotate specific
         self._target_yaw       = 0.0     # desired heading (rad, map frame)
@@ -219,6 +219,7 @@ class CheckpointNavigator(Node):
             return
 
         # All clear — start navigation pipeline
+        self._is_returning_home = False   # ← THÊM DÒNG NÀY (lệnh thủ công không phải return home)
         self._request_navigation(cp_id)
 
     def _on_estop(self, msg: Bool):
@@ -227,6 +228,7 @@ class CheckpointNavigator(Node):
                 self.get_logger().warn("!!! EMERGENCY STOP activated !!!")
                 self.state      = State.EMERGENCY_STOP
                 self.current_cp = -1
+                self._is_returning_home = False   # ← THÊM DÒNG NÀY
                 self._stop_robot()
                 if self.goal_handle:
                     self.goal_handle.cancel_goal_async()
@@ -248,6 +250,7 @@ class CheckpointNavigator(Node):
             if time.time() - self.arrival_time >= self.timeout:
                 self.get_logger().info(
                     f"Timeout at [{self.current_cp}]. Returning home.")
+                self._is_returning_home = True    # ← THÊM DÒNG NÀY
                 self.state = State.RETURNING_HOME
                 self._request_navigation(self.home_id)
             return
@@ -460,7 +463,9 @@ class CheckpointNavigator(Node):
             self.arrival_time = time.time()
             name = self.checkpoints[self.current_cp]["name"]
 
-            if self.state == State.RETURNING_HOME or self.current_cp == self.home_id:
+            # Dùng flag thay vì self.state == State.RETURNING_HOME
+            if self._is_returning_home:
+                self._is_returning_home = False   # ← reset flag
                 self.state = State.IDLE
                 self.get_logger().info(
                     f"Arrived at Home [{self.current_cp}] '{name}'. State: IDLE.")
@@ -475,12 +480,14 @@ class CheckpointNavigator(Node):
                     f"Returning home in {self.timeout:.0f}s.")
 
         elif status == GoalStatus.STATUS_CANCELED:
+            self._is_returning_home = False   # ← reset flag
             self.current_cp = -1
             if self.state != State.EMERGENCY_STOP:
                 self.state = State.IDLE
                 self.get_logger().info("Goal canceled. State: IDLE.")
 
         elif status == GoalStatus.STATUS_ABORTED:
+            self._is_returning_home = False   # ← reset flag
             self.current_cp = -1
             self.get_logger().error(
                 f"Navigation ABORTED to [{self.target_cp}]. "
