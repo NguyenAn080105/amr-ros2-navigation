@@ -3,10 +3,10 @@ amcl:
   ros__parameters:
     use_sim_time: False
     set_initial_pose: True
-    initial_pose_x: -4.047
-    initial_pose_y: -7.508
+    initial_pose_x: -0.28527
+    initial_pose_y: -0.159881
     initial_pose_z: 0.0
-    initial_pose_yaw: -0.341
+    initial_pose_yaw: 2.75943
 
     # Nhiễu mô hình chuyển động odometry (dẫn động vi sai).
     # α1: quay→quay  | α2: tịnh tiến→quay | α3: tịnh tiến→tịnh tiến | α4: quay→tịnh tiến | α5: tịnh tiến→tịnh tiến (trượt ngang)
