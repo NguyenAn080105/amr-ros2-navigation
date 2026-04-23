@@ -309,7 +309,7 @@ def generate_launch_description():
             'ros2', 'topic', 'pub', '--once',
             '/initialpose',
             'geometry_msgs/msg/PoseWithCovarianceStamped',
-            '{"header": {"frame_id": "map"}, "pose": {"pose": {"position": {"x": -4.047, "y": -7.508, "z": 0.0}, "orientation": {"x": 0.0, "y": 0.0, "z": -0.1701, "w": 0.9854}}, "covariance": [0.25,0,0,0,0,0,0,0.25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.068]}}'
+            '{ "header": { "frame_id": "map" }, "pose": { "pose": { "position": { "x": -0.28527, "y": -0.159881, "z": 0.0 }, "orientation": { "x": 0.0, "y": 0.0, "z": 0.981799, "w": 0.189923 } }, "covariance": [0.25, 0, 0, 0, 0, 0, 0, 0.25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.068] } }'
         ],
         output='screen'
     )
