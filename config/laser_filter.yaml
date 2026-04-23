@@ -42,7 +42,7 @@ scan_to_scan_filter_chain:
       type: laser_filters/LaserScanAngularBoundsFilterInPlace
       params:
        lower_angle:   -1.98495 #  
-       upper_angle:  -1.75806 # 
+       upper_angle:  -1.65806 # 
        invert: false          # XÓA vùng nằm TRONG khoảng này
     # Cấu hình đồng bộ TF
     tf_message_filter_target_frame: base_footprint
