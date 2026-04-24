@@ -32,9 +32,6 @@ install(PROGRAMS scripts/imu_reader.py
 install(PROGRAMS scripts/wheel_odom_node.py
   DESTINATION lib/${PROJECT_NAME}
   RENAME wheel_odom_node)
-install(PROGRAMS scripts/jetson_sensor_bridge.py
-  DESTINATION lib/${PROJECT_NAME}
-  RENAME jetson_sensor_bridge)
 install(
   PROGRAMS
     scripts/robot_teleop.py
@@ -42,6 +39,7 @@ install(
     scripts/checkpoint_cmd.py
     scripts/session_logger.py
     scripts/ultrasonic_fusion_node.py
+    scripts/endurance_test.py
   DESTINATION lib/${PROJECT_NAME}
 )
 # ── Install launch files ────────────────────────────────────────────────────────
@@ -59,6 +57,10 @@ install(DIRECTORY urdf/
   DESTINATION share/${PROJECT_NAME}/urdf
 )
 
+# ── Install jetson_sensor_bridge ───────────────────────────────────────────────────────
+install(PROGRAMS scripts/jetson_sensor_bridge.py
+DESTINATION lib/${PROJECT_NAME}
+RENAME jetson_sensor_bridge.py)
 # ── Install meshes ─────────────────────────────────────────────────────────────
 install(DIRECTORY meshes/
   DESTINATION share/${PROJECT_NAME}/meshes

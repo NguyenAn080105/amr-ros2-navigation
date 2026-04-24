@@ -41,9 +41,17 @@ scan_to_scan_filter_chain:
       name: remove_290_to_300
       type: laser_filters/LaserScanAngularBoundsFilterInPlace
       params:
-       lower_angle:   -1.98495 #  
-       upper_angle:  -1.65806 # 
+       lower_angle:   -1.93895 #  
+       upper_angle:  -1.53806 # 
        invert: false          # XÓA vùng nằm TRONG khoảng này
+    filter5:
+      name: remove_291_to_300
+      type: laser_filters/LaserScanAngularBoundsFilterInPlace
+      params:
+       lower_angle:   -1.35895 #  
+       upper_angle:  -0.37806 # 
+       invert: false          # XÓA vùng nằm TRONG khoảng này
+       
     # Cấu hình đồng bộ TF
     tf_message_filter_target_frame: base_footprint
     tf_message_filter_queue_size: 20

@@ -186,12 +186,12 @@
     <joint name="laser_joint" type="fixed">
         <parent link="chassis"/>
         <child link="laser_frame"/>
-        <origin xyz="0.257 0 0.075" rpy="0 0 0"/>
+        <origin xyz="0.257 0 0.075" rpy="0 0 3.14159"/>
     </joint>
 
     <link name="laser_frame">
         <visual>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0 0 0" rpy="0 0 3.14159"/>
             <geometry>
                 <!-- <cylinder length="0.04" radius="0.038"/> -->
                 <mesh filename="package://mobile_robot/meshes/RPLiDAR_s2.stl" scale="0.001 0.001 0.001"/>
@@ -199,10 +199,10 @@
             <material name="black"/>
         </visual>
         <collision>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <origin xyz="0 0 0" rpy="0 0 3.14159"/>
             <geometry>
-                <!-- <cylinder length="0.04" radius="0.038"/> -->
-                <mesh filename="package://mobile_robot/meshes/RPLiDAR_s2.stl" scale="0.001 0.001 0.001"/>
+                <cylinder length="0.04" radius="0.038"/>
+                <!-- <mesh filename="package://mobile_robot/meshes/RPLiDAR_s2.stl" scale="0.001 0.001 0.001"/> -->
             </geometry>
         </collision>
         <xacro:inertial_cylinder mass="0.1" length="0.04" radius="0.038">
@@ -249,12 +249,12 @@
         </link>
     </xacro:macro>
 
-    <joint name="us_top_left_joint" type="fixed">
+    <!-- <joint name="us_top_left_joint" type="fixed">
         <parent link="chassis"/>
         <child link="us_top_left_link"/>
         <origin xyz="0.35 0.17 0.48" rpy="0 0 0"/>
     </joint>
-    <xacro:ultrasonic_link name="us_top_left"/>
+    <xacro:ultrasonic_link name="us_top_left"/> -->
 
     <joint name="us_top_right_joint" type="fixed">
         <parent link="chassis"/>
