@@ -70,7 +70,7 @@ class WheelOdomNode(Node):
         super().__init__('wheel_odom_node')
 
         # 1. Parameters
-        self.declare_parameter('serial_port', '/dev/ttyUSB1')
+        self.declare_parameter('serial_port', '/dev/ttyUltrasonic')
         self.declare_parameter('baud_rate', 115200)
         self.declare_parameter('publish_tf', False) # EKF sẽ lo việc này
         

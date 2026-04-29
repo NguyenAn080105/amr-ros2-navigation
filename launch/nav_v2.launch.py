@@ -16,7 +16,7 @@
 #  10. scan_to_scan_filter_chain  — /scan → /scan_filtered             [t = 10.0s]
 #  11. nav2_bringup               — AMCL + Planner + Controller + BT   [t = 12.0s]
 #  12. set_initial_pose           — Publish AMCL initial pose          [t = 15.0s]
-#  13. checkpoint_navigator       — Autonomous waypoint sequencer      [t = 20.0s] (optional)
+#  13. checkpoint_navigator       — Autonomous waypoint sequencer      [t = 20.0s]
 #
 # Environment (Jetson + Laptop must be the same):
 #   export ROS_DOMAIN_ID=42
@@ -27,9 +27,6 @@
 #
 # Run for a specific floor (e.g., e1):
 #   ros2 launch mobile_robot nav_v2_launch.py floor:=e1
-#
-# Override ultrasonic serial port (default /dev/ttyUSB1):
-#   ros2 launch mobile_robot nav_v2_launch.py us_serial_port:=/dev/ttyUSB2
 # ──────────────────────────────────────────────────────────────────────────────
 
 import os
@@ -82,7 +79,7 @@ def generate_launch_description():
 
     declare_us_serial_port = DeclareLaunchArgument(
         'us_serial_port',
-        default_value='/dev/ttyUSB0',
+        default_value='/dev/ttyUltrasonic',
         description='Serial port for ultrasonic sensor bridge (STM32/Arduino).'
     )
 
@@ -319,14 +316,15 @@ def generate_launch_description():
     )
 
     # ══════════════════════════════════════════════════════════════════════════
-    # SET INITIAL POSE                                                [t = 15s]
+    # NODE 12 - SET INITIAL POSE                                       [t = 15s]
     # ══════════════════════════════════════════════════════════════════════════
     set_initial_pose = ExecuteProcess(
         cmd=[
             'ros2', 'topic', 'pub', '--once',
             '/initialpose',
             'geometry_msgs/msg/PoseWithCovarianceStamped',
-            '{"header": {"frame_id": "map"}, "pose": {"pose": {"position": {"x": -4.047, "y": -7.508, "z": 0.0}, "orientation": {"x": 0.0, "y": 0.0, "z": -0.1701, "w": 0.9854}}, "covariance": [0.25,0,0,0,0,0,0,0.25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.068]}}'
+            # '{"header": {"frame_id": "map"}, "pose": {"pose": {"position": {"x": -4.047, "y": -7.508, "z": 0.0}, "orientation": {"x": 0.0, "y": 0.0, "z": -0.1701, "w": 0.9854}}, "covariance": [0.25,0,0,0,0,0,0,0.25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.068]}}'
+            '{"header": {"frame_id": "map"}, "pose": {"pose": {"position": {"x": -0.285, "y": -0.159, "z": 0.0}, "orientation": {"x": 0.0, "y": 0.0, "z": 0.9818, "w": 0.1899}}, "covariance": [0.25,0,0,0,0,0,0,0.25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.068]}}'
         ],
         output='screen'
     )
@@ -381,14 +379,14 @@ def generate_launch_description():
         wheel_odom_node,            # /odom từ STM32
         bno055_node,                # /imu/data từ I2C
         lidar_node,                 # /scan từ RPLIDAR UDP
-        jetson_sensor_bridge_node,  # /ultrasonic/* từ UART
+        # jetson_sensor_bridge_node,  # /ultrasonic/* từ UART
 
         delayed_jsp,
         delayed_imu_reader,
-        delayed_ultrasonic_fusion,
+        # delayed_ultrasonic_fusion,
         delayed_ekf,
         delayed_scan_filter,
         delayed_nav2,
-        # delayed_initial_pose,
+        delayed_initial_pose,
         delayed_checkpoint_nav,
     ])

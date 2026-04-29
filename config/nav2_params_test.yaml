@@ -2,17 +2,17 @@
 amcl:
   ros__parameters:
     use_sim_time: False
-    set_initial_pose: False
+    set_initial_pose: True
     # ----- Lab door -----
     initial_pose_x: -0.28527
     initial_pose_y: -0.159881
     initial_pose_z: 0.0
     initial_pose_yaw: 2.75943
     # ----- Lab -----
-    #initial_pose_x: -4.060969452922816
-    #initial_pose_y: -7.062074023321159
-    #initial_pose_z: 0.0
-    #initial_pose_yaw: -0.16922996701569956
+    # initial_pose_x: -4.060969452922816
+    # initial_pose_y: -7.062074023321159
+    # initial_pose_z: 0.0
+    # initial_pose_yaw: -0.16922996701569956
 
     # Nhiễu mô hình chuyển động odometry (dẫn động vi sai).
     # α1: quay→quay  | α2: tịnh tiến→quay | α3: tịnh tiến→tịnh tiến | α4: quay→tịnh tiến | α5: tịnh tiến→tịnh tiến (trượt ngang)
@@ -39,7 +39,7 @@ amcl:
     laser_model_type: "likelihood_field" # mô hình ưu tiên cho môi trường trong nhà 2-D
 
     # Số tia được lấy mẫu con cho mỗi bước cập nhật
-    max_beams: 160                 # giới hạn số tia chùm được sử dụng để cập nhật bộ lọc (giảm tải CPU)
+    max_beams: 120                 # giới hạn số tia chùm được sử dụng để cập nhật bộ lọc (giảm tải CPU)
     
     max_particles: 2000            # giới hạn trên số lượng hạt — trần độ chính xác
     min_particles: 500             # giới hạn dưới số lượng hạt — sàn tài nguyên CPU
@@ -180,12 +180,12 @@ controller_server:
       decel_lim_theta: -1.0       # [rad/s²]
 
       # ── Lấy mẫu quỹ đạo ──────────────────────────────────────────────────
-      vx_samples: 10               # số mẫu vận tốc tuyến tính trong cửa sổ động
+      vx_samples: 15               # số mẫu vận tốc tuyến tính trong cửa sổ động
       vy_samples: 1                # không lấy mẫu ngang
-      vtheta_samples: 20           # số mẫu vận tốc góc
+      vtheta_samples: 15           # số mẫu vận tốc góc
 
       # ── Mô phỏng tiến ───────────────────────────────────────────────────
-      sim_time: 2.0                # [s]   độ dài chân trời rollout
+      sim_time: 1.5                # [s]   độ dài chân trời rollout
       linear_granularity: 0.05     # [m]   bước cung tròn để kiểm tra va chạm
       angular_granularity: 0.025   # [rad] bước góc để kiểm tra va chạm
       transform_tolerance: 0.5     # [s]   dung sai tuổi tra cứu TF
@@ -199,24 +199,18 @@ controller_server:
       yaw_goal_tolerance: 0.2     # [rad] dung sai góc tại đích (~10 độ)
 
       # ── Các hàm chấm điểm (critic) ───────────────────────────────────────
-      critics: ["ObstacleFootprint","RotateToGoal", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
+      critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
 
-      ObstacleFootprintCritic.scale: 80.0 
-      #ObstacleFootprint.obstacle_cost_exponent: 3.0  # tăng độ dốc của chi phí khi gần vật cản
-      #ObstacleFootprint.inflation_cost_exponent: 2.0 # tăng độ dốc của chi phí khi gần vùng phồng nề
-
-      BaseObstacle.scale: 40.0               # phạt khi tiếp cận vật cản chết người/phồng nề
+      BaseObstacle.scale: 80.0               # phạt khi tiếp cận vật cản chết người/phồng nề
       PathAlign.scale: 24.0                  # phạt khi lệch hướng so với đường dẫn toàn cục
       PathAlign.forward_point_distance: 0.4  # [m] khoảng cách nhìn trước để chấm điểm căn chỉnh đường dẫn
-      PathDist.scale: 24.0                   # phạt khoảng cách ngang so với đường dẫn toàn cục
-
       GoalAlign.scale: 12.0                  # phạt khi lệch hướng so với hướng đến đích
-      GoalAlign.forward_point_distance: 0.4  # [m] khoảng cách nhìn trước để chấm điểm căn chỉnh hướng đến đích
-      GoalDist.scale: 24.0                   # phạt khoảng cách đến đích
-
-      RotateToGoal.scale: 32.0               # phạt khi không xoay về hướng đến đích
-      RotateToGoal.slowing_factor: 2.0       # hệ số giảm vận tốc khi cần xoay về hướng đến đích
-      RotateToGoal.lookahead_time: -1.0      # [s] thời gian nhìn trước để chấm điểm xoay (âm = dùng khoảng cách đến đích)
+      GoalAlign.forward_point_distance: 0.4  # [m]
+      PathDist.scale: 24.0                   # phạt khoảng cách ngang so với đường dẫn toàn cục
+      GoalDist.scale: 24.0                   # phạt khoảng cách Euclid đến đích
+      RotateToGoal.scale: 32.0               # xoay tại chỗ khi gần đến đích
+      RotateToGoal.slowing_factor: 2.0       # hệ số giảm vận tốc trong quá trình xoay
+      RotateToGoal.lookahead_time: -1.0      # âm → vô hiệu hóa
 
 controller_server_rclcpp_node:
   ros__parameters:
@@ -235,9 +229,9 @@ local_costmap:
       width: 5                       # [m] chiều rộng cửa sổ
       height: 5                      # [m] chiều cao cửa sổ
       resolution: 0.05               # [m/ô lưới]
-      #footprint_padding: 0.01
+      footprint_padding: 0.01
       # Đa giác footprint của robot trong frame base_footprint [trước→sau, trái→phải].
-      footprint: "[[0.32, 0.30], [0.32, -0.30], [-0.12, -0.30], [-0.12, 0.30]]"
+      footprint: "[[0.35, 0.32], [0.35, -0.32], [-0.14, -0.32], [-0.14, 0.32]]"
       robot_base_frame: base_footprint
       update_frequency: 20.0         # [Hz] phải khớp với controller_frequency
       publish_frequency: 5.0         # [Hz] tần suất cập nhật RViz
@@ -252,10 +246,11 @@ local_costmap:
           clearing: True             # truy vết tia để xóa vùng trống phía sau tia rõ ràng
           marking: True              # đánh dấu ô bị chiếm khi có tia phản xạ
           data_type: "LaserScan"
-          raytrace_max_range: 10.5    # [m]  khoảng cách xóa vùng trống tối đa
+          raytrace_max_range: 7.5    # [m]  khoảng cách xóa vùng trống tối đa
           raytrace_min_range: 0.0
-          obstacle_max_range: 10.0    # [m]  khoảng cách đánh dấu vật cản tối đa
+          obstacle_max_range: 7.0    # [m]  khoảng cách đánh dấu vật cản tối đa
           obstacle_min_range: 0.0
+
         ultrasonic:
           topic: /ultrasonic_scan
           sensor_frame: base_footprint
@@ -271,8 +266,8 @@ local_costmap:
           inf_is_valid: false
 
       inflation_layer:
-        cost_scaling_factor: 1.0     # tốc độ suy giảm mũ của chi phí theo khoảng cách từ vật cản
-        inflation_radius: 0.12        # [m]  bán kính phồng nề quanh vật cản
+        cost_scaling_factor: 2.2     # tốc độ suy giảm mũ của chi phí theo khoảng cách từ vật cản
+        inflation_radius: 0.37        # [m]  bán kính phồng nề quanh vật cản
 
       always_send_full_costmap: True
 
@@ -283,9 +278,9 @@ global_costmap:
     ros__parameters:
       use_sim_time: False
       global_frame: map              # neo vào frame bản đồ tĩnh
-      footprint: "[[0.32, 0.30], [0.32, -0.30], [-0.12, -0.30], [-0.12, 0.30]]"
+      footprint: "[[0.35, 0.32], [0.35, -0.32], [-0.14, -0.32], [-0.14, 0.32]]"
       resolution: 0.05               # [m/ô lưới]
-      # footprint_padding: 0.01
+      footprint_padding: 0.01
       robot_base_frame: base_footprint
       update_frequency: 8.0          # [Hz] thấp hơn cục bộ (lập lịch lại toàn cục chậm hơn)
       publish_frequency: 2.0         # [Hz]
@@ -314,8 +309,8 @@ global_costmap:
           obstacle_min_range: 0.0
 
       inflation_layer:
-        cost_scaling_factor: 1.5
-        inflation_radius: 0.20        # [m]
+        cost_scaling_factor: 3.5
+        inflation_radius: 0.37       # [m]
 
       always_send_full_costmap: True
 
@@ -330,7 +325,7 @@ global_costmap:
 map_server:
   ros__parameters:
     use_sim_time: False
-    yaml_filename: "/home/nguyenan/mbrobot_ws/src/mobile_robot/maps/lab_demo_map.yaml"
+    yaml_filename: ""
 
 # ==================== PLANNER SERVER ====================
 # Bộ lập lịch toàn cục NavFn — tính toán đường đi không va chạm trên costmap toàn cục.

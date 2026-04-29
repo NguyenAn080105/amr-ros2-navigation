@@ -24,7 +24,7 @@ class UltrasonicNode(Node):
             for name in INDEX_TO_SENSOR.values()
         }
 
-        self.ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1)
+        self.ser = serial.Serial('/dev/ttyUltrasonic', 115200, timeout=1)
         self.ser.reset_input_buffer()
         self.create_timer(0.2, self.read_serial)
 
@@ -42,7 +42,7 @@ class UltrasonicNode(Node):
     def read_serial(self):
         if not self.ser.in_waiting:
             return
-        self.get_logger().info('Got data from serial') 
+        # self.get_logger().info('Got data from serial') 
 
         #self.get_logger().info(f'Raw: {line}') 
         lines = []
@@ -75,8 +75,7 @@ class UltrasonicNode(Node):
             for idx, dist_cm in enumerate(vals):
                 name = INDEX_TO_SENSOR[idx]
                 self.pubs[name].publish(self.make_range(name, dist_cm))
-                self.get_logger().info(
-                f'F0={vals[0]} F1={vals[1]} F2={vals[2]} L={vals[3]} R={vals[4]} B0={vals[5]} B1={vals[6]}')
+                # self.get_logger().info(f'F0={vals[0]} F1={vals[1]} F2={vals[2]} L={vals[3]} R={vals[4]} B0={vals[5]} B1={vals[6]}')
 
         except (ValueError, IndexError):
             return
