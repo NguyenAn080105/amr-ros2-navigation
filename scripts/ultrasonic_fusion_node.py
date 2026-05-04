@@ -34,8 +34,8 @@ SENSOR_HEIGHT = {
 SENSOR_PITCH = {
     'us_bot_left':    0.0,
     'us_bot_right':   0.0,
-    'us_mid_2_left':  0.0,
-    'us_mid_2_right': 0.0,
+    # 'us_mid_2_left':  0.0,
+    # 'us_mid_2_right': 0.0,
     # top/mid_1 đủ cao → floor echo nằm ngoài tầm đo → không cần filter
 }
 
