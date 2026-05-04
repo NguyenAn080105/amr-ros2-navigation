@@ -23,10 +23,53 @@ SENSOR_HEIGHT = {
     'us_bot_right':   0.12 + WHEEL_RADIUS,
 }
 
+# ── Floor echo filter ────────────────────────────────────────────────────────
+# us_bot pitch = 0° (nằm ngang) → beam tâm song song sàn.
+# Beam cone FOV = 0.26 rad → bán góc BEAM_HALF_ANGLE = 0.13 rad ≈ 7.45°
+# Edge dưới của beam chạm sàn tại: h / tan(BEAM_HALF_ANGLE)
+#   us_bot: h = 0.20255 m → floor_baseline = 0.20255 / tan(7.45°) ≈ 1.55 m
+#
+# Cập nhật SENSOR_PITCH nếu sau này hardware được điều chỉnh góc mount.
+# Dương = ngẩng lên, âm = cúi xuống (rad, khớp với URDF rpy).
+SENSOR_PITCH = {
+    'us_bot_left':    0.0,
+    'us_bot_right':   0.0,
+    'us_mid_2_left':  0.0,
+    'us_mid_2_right': 0.0,
+    # top/mid_1 đủ cao → floor echo nằm ngoài tầm đo → không cần filter
+}
+
+BEAM_HALF_ANGLE = 0.13    # rad — FOV/2 của HC-SR04 (FOV ≈ 0.26 rad = 15°)
+FLOOR_TOLERANCE = 0.15    # m  — dải ± quanh baseline bị lọc
+                           #      tăng nếu vẫn còn phantom, giảm nếu miss vật cản thật
+
+
+def _compute_floor_baseline(sensor_name: str) -> float:
+    """
+    Khoảng cách dọc theo trục beam mà edge dưới của cone chạm sàn.
+
+    effective_angle = pitch - BEAM_HALF_ANGLE
+      > 0 → edge dưới vẫn ngẩng lên → không bao giờ chạm sàn → inf
+      = 0 → edge dưới nằm ngang      → chạm sàn ở ∞              → inf
+      < 0 → edge dưới cúi xuống      → chạm sàn tại h/tan(|eff|)
+    """
+    h     = SENSOR_HEIGHT.get(sensor_name)
+    pitch = SENSOR_PITCH.get(sensor_name)
+    if h is None or pitch is None:
+        return float('inf')
+    effective = pitch - BEAM_HALF_ANGLE
+    if effective >= 0:
+        return float('inf')
+    return h / math.tan(abs(effective))
+
+
+# Pre-compute một lần khi load module
+FLOOR_BASELINE = {n: _compute_floor_baseline(n) for n in SENSOR_PITCH}
+
 
 class UltrasonicFusionNode(Node):
 
-    COSTMAP_RANGE_MAX    = 1.5    # m
+    COSTMAP_RANGE_MAX    = 2.0    # m
     HARD_STOP_THRESHOLD  = 0.20   # m — kích hoạt hard stop
     HARD_STOP_HYSTERESIS = 0.30   # m — giải phóng hard stop
     SENSOR_X_OFFSET      = 0.35   # m — offset sensor từ base_footprint
@@ -61,6 +104,14 @@ class UltrasonicFusionNode(Node):
 
         self.create_timer(0.1, self._publish_scan)
 
+        # Log floor baseline để verify sau khi deploy
+        for name, baseline in FLOOR_BASELINE.items():
+            if not math.isinf(baseline):
+                self.get_logger().info(
+                    f'[FloorFilter] {name}: h={SENSOR_HEIGHT[name]:.3f}m | '
+                    f'pitch={math.degrees(SENSOR_PITCH[name]):.1f}deg | '
+                    f'baseline={baseline:.3f}m ± {FLOOR_TOLERANCE}m')
+
         self.get_logger().info('=== Ultrasonic Fusion Node ===')
         self.get_logger().info(
             '(Costmap): /ultrasonic_scan → Nav2 local_costmap auto replanning')
@@ -71,9 +122,17 @@ class UltrasonicFusionNode(Node):
 
     # ── Sensor callback ───────────────────────────────────────────────────────
     def _range_cb(self, msg: Range, name: str):
-        if msg.min_range <= msg.range <= msg.max_range:
-            self.buffers[name].append(msg.range)
-        elif msg.range >= msg.max_range:
+        r = msg.range
+
+        # Floor echo filter: nếu reading nằm trong vùng [baseline-tol, baseline+tol]
+        # → beam đang phản xạ từ sàn, không phải vật cản → bỏ qua hoàn toàn
+        baseline = FLOOR_BASELINE.get(name, float('inf'))
+        if not math.isinf(baseline) and abs(r - baseline) <= FLOOR_TOLERANCE:
+            return
+
+        if msg.min_range <= r <= msg.max_range:
+            self.buffers[name].append(r)
+        elif r >= msg.max_range:
             self.buffers[name].append(float('inf'))
         # < min_range → nhiễu cực gần, bỏ qua
 
