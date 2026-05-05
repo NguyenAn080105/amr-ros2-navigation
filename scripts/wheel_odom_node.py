@@ -29,41 +29,35 @@ WHEEL_RADIUS  = 0.08255     # m  (từ URDF)
 WHEEL_BASE    = 0.42109     # m  (wheel_separation)
 
 # -----------------------------------------------------------------------------------------
-# 1. GIỚI HẠN PHẦN CỨNG THỰC TẾ CỦA ĐỘNG CƠ (HARDWARE LIMITS)
-# Tốc độ quay tối đa thực tế của động cơ hoverboard (RPM) thiết lập (config) trong STM32 firmware.
+# 1. HARDWARE LIMITS (motor constraints configured in STM32 firmware)
+# Actual max RPM of the hoverboard motors configured in STM32 firmware.
 MOTOR_MAX_RPM   = 40.0  
-# Vận tốc góc tối đa của bánh xe (rad/s)
+# Max wheel angular velocity (rad/s)
 OMEGA_MAX       = MOTOR_MAX_RPM * 2 * math.pi / 60     
-# Vận tốc tịnh tiến tối đa lý thuyết mà hệ thống cơ khí có thể đạt được (m/s)
+# Theoretical max linear velocity achievable by the mechanical system (m/s)
 V_MAX_HW        = OMEGA_MAX * WHEEL_RADIUS                   
 
 # -----------------------------------------------------------------------------------------
-# 2. GIỚI HẠN VÀ HỆ SỐ QUY ĐỔI CHO LỆNH ĐIỀU KHIỂN (UART COMMANDS ĐẾN STM32)
-# Dành cho firmware "hoverboard-firmware-hack-FOC"
+# 2. SOFTWARE LIMITS (velocity constraints for navigation)
+# Max allowed linear/angular velocity (m/s)
+MAX_LINEAR_VEL  = 0.6
+# Formula: w = (2 * v_wheel) / wheel_base.
+MAX_ANGULAR_VEL = 1.5
 
-# Hệ số quy đổi lệnh vận tốc tịnh tiến từ ROS (m/s) sang STM32 (int).
+# -----------------------------------------------------------------------------------------
+# 3. UART COMMAND LIMITS AND SCALING (ROS -> STM32)
+
+# Scale factor for linear/angular velocity command (ROS [m/s] -> STM32 [int]).
 # CMD_SCALE_SPEED = STM32_SPEED_MAX / MAX_LINEAR_VEL
 CMD_SCALE_SPEED = 116
-# Hệ số quy đổi lệnh vận tốc góc (xoay) từ ROS (rad/s) sang STM32 (int).
 # CMD_SCALE_STEER = STM32_STEER_MAX / MAX_ANGULAR_VEL
 CMD_SCALE_STEER = 24
 
-# Ngưỡng vận tốc tịnh tiến tối đa (Speed) được phép gửi xuống STM32
-# Công thức: STM32_SPEED_MAX = MAX_LINEAR_VEL * CMD_SCALE_SPEED 
+# Max linear/angular speed threshold sent to STM32
+# Formula: STM32_SPEED_MAX = MAX_LINEAR_VEL * CMD_SCALE_SPEED
 STM32_SPEED_MAX = 70
-# Ngưỡng vận tốc xoay tối đa (Steer) được phép gửi xuống STM32.
-# Công thức: STM32_STEER_MAX = MAX_ANGULAR_VEL * CMD_SCALE_STEER 
+# Formula: STM32_STEER_MAX = MAX_ANGULAR_VEL * CMD_SCALE_STEER
 STM32_STEER_MAX = 60
-
-# -----------------------------------------------------------------------------------------
-# 3. GIỚI HẠN VẬN TỐC PHẦN MỀM (SOFTWARE LIMITS DÀNH CHO NAV2 / BỘ ĐIỀU KHIỂN)
-
-# Vận tốc tịnh tiến tối đa cho phép (m/s)
-MAX_LINEAR_VEL  = 0.6
-# Vận tốc góc tối đa cho phép robot xoay (Yaw) (rad/s)
-# Công thức w = (2 * v_wheel) / wheel_base. 
-MAX_ANGULAR_VEL = 1.5
-
 
 class WheelOdomNode(Node):
     def __init__(self):
@@ -72,7 +66,7 @@ class WheelOdomNode(Node):
         # 1. Parameters
         self.declare_parameter('serial_port', '/dev/ttyUltrasonic')
         self.declare_parameter('baud_rate', 115200)
-        self.declare_parameter('publish_tf', False) # EKF sẽ lo việc này
+        self.declare_parameter('publish_tf', False)     # EKF handles TF broadcast
         
         port = self.get_parameter('serial_port').value
         baud = self.get_parameter('baud_rate').value
@@ -84,8 +78,7 @@ class WheelOdomNode(Node):
         self.theta = 0.0
         self.last_time = self.get_clock().now()
 
-        # 3. ROS Publishers & TF
-        # Nhận
+        # 3. ROS Publishers & Subscriptions
         self.odom_pub = self.create_publisher(Odometry, 'odom', 10)
         if self.publish_tf_flag:
             self.tf_broadcaster = tf2_ros.TransformBroadcaster(self)
@@ -112,29 +105,27 @@ class WheelOdomNode(Node):
         self._pkt_queue = queue.Queue(maxsize=50)
         self._stop_event = threading.Event()
         
-        # Khởi chạy Thread đọc Serial (Daemon = True để tự tắt khi node chết)
+        # Start Serial Reader Thread (Daemon = True for auto-termination when node dies)
         self._serial_thread = threading.Thread(target=self._serial_reader_loop, daemon=True)
         self._serial_thread.start()
 
-        # 6. ROS Timer (chỉ để lấy data từ Queue và publish) - 100Hz = 0.01s
+        # 6. ROS Timer (Fetches data from Queue to publish) - 100Hz = 0.01s
         self.create_timer(0.01, self._process_queue)
 
     def _serial_reader_loop(self):
-        """Thread riêng rẽ: Đọc và parse dữ liệu Serial liên tục, không block ROS."""
+    """Dedicated thread: Continuously reads and parses Serial data without blocking ROS."""        
         buffer = bytearray()
-        
         while not self._stop_event.is_set():
             if not self.ser.is_open:
                 break
                 
             try:
-                # Đọc tất cả data đang có trong buffer của OS
+                # Read all available data in the OS buffer
                 waiting = self.ser.in_waiting or 1
                 data = self.ser.read(waiting)
                 if data:
                     buffer.extend(data)
                     
-                    # Tìm và parse packet
                     while len(buffer) >= PACKET_SIZE:
                         if buffer[0] == (START_FRAME & 0xFF) and buffer[1] == ((START_FRAME >> 8) & 0xFF):
                             packet = buffer[:PACKET_SIZE]
@@ -151,7 +142,6 @@ class WheelOdomNode(Node):
                                 
                                 pkt_data = {'omega_L': omega_L, 'omega_R': omega_R}
                                 
-                                # Đẩy vào Queue an toàn
                                 if self._pkt_queue.full():
                                     self._pkt_queue.get_nowait() # Bỏ packet cũ nhất chống trễ
                                 self._pkt_queue.put_nowait(pkt_data)
@@ -159,15 +149,14 @@ class WheelOdomNode(Node):
                             except Exception as e:
                                 self.get_logger().warn(f"Packet parse error: {e}")
                                 
-                            buffer = buffer[PACKET_SIZE:] # Cắt bỏ packet đã xử lý
+                            buffer = buffer[PACKET_SIZE:]
                         else:
-                            buffer.pop(0) # Trượt buffer 1 byte nếu không tìm thấy Header
+                            buffer.pop(0)
             except Exception as e:
                 self.get_logger().error(f"Serial read error: {e}")
                 break
 
     def _process_queue(self):
-        """ROS Timer callback @100Hz: RẤT NHANH, KHÔNG BLOCK."""
         while not self._pkt_queue.empty():
             try:
                 pkt = self._pkt_queue.get_nowait()
@@ -176,7 +165,7 @@ class WheelOdomNode(Node):
                 break
 
     def _update_odom(self, omega_L, omega_R):
-        """Tính toán tịnh tiến (v) và quay (w) từ vận tốc góc của 2 bánh."""
+        """Calculate linear (v) and angular (w) velocities from wheel angular velocities."""
         current_time = self.get_clock().now()
         dt = (current_time - self.last_time).nanoseconds / 1e9
         self.last_time = current_time
@@ -184,14 +173,14 @@ class WheelOdomNode(Node):
         if dt <= 0:
             return
 
-        # Tính v và w cho differential drive
+        # Calculate v and w for differential drive
         v_L = omega_L * WHEEL_RADIUS
         v_R = omega_R * WHEEL_RADIUS
         
         v = (v_R + v_L) / 2.0
         w = (v_R - v_L) / WHEEL_BASE
 
-        # Cập nhật vị trí x, y, theta
+        # Update position x, y, theta
         delta_x = v * math.cos(self.theta) * dt
         delta_y = v * math.sin(self.theta) * dt
         delta_theta = w * dt
@@ -218,17 +207,15 @@ class WheelOdomNode(Node):
         odom.twist.twist.angular.z = w
 
         # odom.twist.covariance = [
-        #     0.03, 0,    0,    0,    0,    0,        # var(vx) - tin cậy hơn vì có encoder
-        #     0,    1e6,  0,    0,    0,    0,        # var(vy) - gần như không đo được vì diff drive
-        #     0,    0,    1e6,  0,    0,    0,        # var(vz) - không đo được vì robot di chuyển trên mặt phẳng
-        #     0,    0,    0,    1e6,  0,    0,        # var(wx) - không đo được vì robot di chuyển trên mặt phẳng
-        #     0,    0,    0,    0,    1e6,  0,        # var(wy) - không đo được vì robot di chuyển trên mặt phẳng
-        #     0,    0,    0,    0,    0,    0.05      # var(wz) - tin cậy hơn vì có encoder
+        #     0.03, 0,    0,    0,    0,    0,        # var(vx) - more reliable than others because of encoder
+        #     0,    1e6,  0,    0,    0,    0,        # var(vy) - nearly impossible to measure due to differential drive
+        #     0,    0,    1e6,  0,    0,    0,        # var(vz) - impossible to measure because the robot moves on a plane
+        #     0,    0,    0,    1e6,  0,    0,        # var(wx) - impossible to measure because the robot moves on a plane
+        #     0,    0,    0,    0,    1e6,  0,        # var(wy) - impossible to measure because the robot moves on a plane
+        #     0,    0,    0,    0,    0,    0.05      # var(wz) - more reliable than others because of encoder
         # ]
 
         self.odom_pub.publish(odom)
-
-        # Chú ý: Vì bạn dùng robot_localization (EKF) nên publish_tf nên bằng False
         if self.publish_tf_flag:
             tf = TransformStamped()
             tf.header = odom.header
@@ -239,7 +226,7 @@ class WheelOdomNode(Node):
             self.tf_broadcaster.sendTransform(tf)
 
     def destroy_node(self):
-        """Cleanup đúng cách khi tắt Node."""
+        """Cleanup correctly when shutting down Node."""
         self.get_logger().info("Shutting down Wheel Odom Node...")
         self._stop_event.set()
         self._serial_thread.join(timeout=2.0)
@@ -253,13 +240,13 @@ class WheelOdomNode(Node):
         v = msg.linear.x
         w = msg.angular.z
 
-        # Clamp theo giới hạn Nav2 trước
+        # Clamp accordance with Nav2 limits
         v = max(-MAX_LINEAR_VEL,  min(MAX_LINEAR_VEL,  v))
         w = max(-MAX_ANGULAR_VEL, min(MAX_ANGULAR_VEL, w))
 
-        # Quy đổi thẳng từ m/s → STM32 units dựa trên v_max hardware thực tế
+        # Convert directly from m/s → STM32 units based on actual v_max hardware
         speed = int(v * CMD_SCALE_SPEED)   # 0.15 m/s → 0.15 × 433.8 = 65
-        steer = int(-w * CMD_SCALE_STEER)  # dấu âm tùy chiều quay STM32
+        steer = int(-w * CMD_SCALE_STEER)  # negative sign depends on STM32 rotation direction
 
         # Clamp hardware limit
         speed = max(-STM32_SPEED_MAX, min(STM32_SPEED_MAX, speed))
@@ -268,7 +255,6 @@ class WheelOdomNode(Node):
         self._send_command(speed, steer)
 
     def _send_command(self, speed: int, steer: int):
-        """Đóng gói và gửi SerialCommand xuống STM32."""
         if not hasattr(self, 'ser') or not self.ser.is_open:
             return
         try:

@@ -8,65 +8,65 @@ amcl:
     # initial_pose_z: 0.0
     # initial_pose_yaw: -0.38
 
-    # Nhiễu mô hình chuyển động odometry (dẫn động vi sai).
-    # α1: quay→quay  | α2: tịnh tiến→quay | α3: tịnh tiến→tịnh tiến | α4: quay→tịnh tiến | α5: tịnh tiến→tịnh tiến (trượt ngang)
-    alpha1: 0.5   # nhiễu quay gây ra bởi chuyển động quay
-    alpha2: 0.3   # nhiễu quay gây ra bởi chuyển động tịnh tiến
-    alpha3: 0.3   # nhiễu tịnh tiến gây ra bởi chuyển động tịnh tiến
-    alpha4: 0.5   # nhiễu tịnh tiến gây ra bởi chuyển động quay
-    alpha5: 0.3   # không sử dụng cho dẫn động vi sai
+    # Odometry motion model noise (differential drive).
+    # alpha1: rot->rot | alpha2: trans->rot | alpha3: trans->trans | alpha4: rot->trans | alpha5: strafing (unused)
+    alpha1: 0.5   # rotational noise from rotation
+    alpha2: 0.3   # rotational noise from translation
+    alpha3: 0.3   # translational noise from translation
+    alpha4: 0.5   # translational noise from rotation
+    alpha5: 0.3   # unused for diff-drive
 
     base_frame_id: "base_footprint"
 
-    # Bỏ qua tia: loại bỏ các tia chùm chạm vào vật cản bất ngờ (vật di chuyển, kính).
-    beam_skip_distance: 0.3        # [m]   độ lệch tối đa để phân loại một tia là có thể bỏ qua
-    beam_skip_error_threshold: 0.9 # [0-1] tỉ lệ tia được phép bỏ qua trước khi vô hiệu hóa cơ chế này
-    beam_skip_threshold: 0.3       # [0-1] tỉ lệ tia phải đồng thuận để kích hoạt bỏ qua
+    # Beam skipping: ignore beams hitting dynamic/unexpected obstacles (e.g., people, glass).
+    beam_skip_distance: 0.3        # [m] max distance error to skip a beam
+    beam_skip_error_threshold: 0.9 # [0-1] max fraction of skipped beams before disabling the mechanism
+    beam_skip_threshold: 0.3       # [0-1] ratio of beams required to trigger skipping
     do_beamskip: True
 
     global_frame_id: "map"
 
-    lambda_short: 0.1              # hằng số suy giảm mũ của mô hình đọc ngắn bất thường
-    laser_likelihood_max_dist: 2.0 # [m]  khoảng cách tối đa để tra cứu bảng trường xác suất (likelihood field)
-    laser_max_range: 14.9          # [m]  phạm vi tối đa hiệu dụng cấp cho AMCL (< RPLIDAR S2E 30 m)
-    laser_min_range: 0.07          # [m]  phạm vi tối thiểu hiệu dụng (≈ ngưỡng dưới của laser_filter)
-    laser_model_type: "likelihood_field" # mô hình ưu tiên cho môi trường trong nhà 2-D
+    lambda_short: 0.1              # exponential decay for short readings model
+    laser_likelihood_max_dist: 2.0 # [m] max distance for likelihood field lookup
+    laser_max_range: 14.9          # [m] max effective range for AMCL (< RPLIDAR S2E 30m limit)
+    laser_min_range: 0.07          # [m] min effective range (approx. laser_filter lower bound)
+    laser_model_type: "likelihood_field" # preferred model for 2D indoor environments
 
-    # Số tia được lấy mẫu con cho mỗi bước cập nhật
-    max_beams: 120    # 2 độ mỗi tia
+    # Subsampled beams per update
+    max_beams: 120                 # max beams used for filter update
     
-    max_particles: 2000            # giới hạn trên số lượng hạt — trần độ chính xác
-    min_particles: 500             # giới hạn dưới số lượng hạt — sàn tài nguyên CPU
+    max_particles: 2000            # upper bound of particles - accuracy ceiling
+    min_particles: 500             # lower bound of particles - CPU floor
 
     odom_frame_id: "odom"
-    pf_err: 0.05                   # giới hạn sai số mục tiêu KLD (phân kỳ Kullback-Leibler)
-    pf_z: 0.99                     # mức độ tin cậy KLD (99 %)
+    pf_err: 0.05                   # KLD target error
+    pf_z: 0.99                     # KLD confidence (99%)
 
-    # Trọng số lấy mẫu lại thích nghi chậm/nhanh (0 = tắt bơm pose ngẫu nhiên).
+    # Fast/slow adaptive resampling weights (0 = disable random pose injection).
     recovery_alpha_fast: 0.0
     recovery_alpha_slow: 0.0
 
-    resample_interval: 1           # lấy mẫu lại sau mỗi N bước cập nhật bộ lọc
+    resample_interval: 1           # resample every N filter updates
 
     robot_model_type: "differential"
 
-    save_pose_rate: 0.5            # [Hz] tốc độ lưu pose cuối cùng đã biết vào parameter server
-    sigma_hit: 0.2                 # [m]  độ lệch chuẩn của mô hình va chạm Gaussian
+    save_pose_rate: 0.5            # [Hz] rate to save last known pose to parameter server
+    sigma_hit: 0.2                 # [m] standard deviation of Gaussian hit model
 
-    tf_broadcast: true             # AMCL phát TF map → odom
-    transform_tolerance: 0.2       # [s]  dung sai nhãn thời gian TF
+    tf_broadcast: true             # AMCL publishes map -> odom TF
+    transform_tolerance: 0.2       # [s] TF timestamp tolerance
 
-    # Chuyển động tối thiểu để kích hoạt cập nhật bộ lọc (tránh tích lũy trôi khi đứng yên).
-    update_min_a: 0.1              # [rad] dịch chuyển góc tối thiểu
-    update_min_d: 0.1              # [m]   dịch chuyển tuyến tính tối thiểu
+    # Min motion to trigger filter update (prevents drift accumulation when stationary).
+    update_min_a: 0.1              # [rad] min angular displacement
+    update_min_d: 0.1              # [m] min linear displacement
 
-    # Trọng số hỗn hợp của mô hình cảm biến tia chùm (tổng phải bằng 1.0).
-    z_hit: 0.5                     # trọng số: mô hình va chạm Gaussian
-    z_max: 0.05                    # trọng số: mô hình lỗi hết tầm đo
-    z_rand: 0.4                    # trọng số: mô hình đo ngẫu nhiên/đồng đều
-    z_short: 0.05                  # trọng số: mô hình vật cản bất ngờ cự ly ngắn
+    # Beam sensor model mixture weights (must sum to 1.0).
+    z_hit: 0.5                     # weight: Gaussian hit model
+    z_max: 0.05                    # weight: max range error model
+    z_rand: 0.4                    # weight: uniform/random measurement model
+    z_short: 0.05                  # weight: short unexpected obstacle model
 
-    scan_topic: /scan_filtered     # dùng scan đã lọc (đã loại bỏ tia phản xạ từ thân robot)
+    scan_topic: /scan_filtered     # uses filtered scan (robot body reflections removed)
 
 amcl_map_client:
   ros__parameters:
@@ -82,11 +82,11 @@ bt_navigator:
     use_sim_time: False
     global_frame: map
     robot_base_frame: base_footprint
-    odom_topic: /odometry/filtered   # odometry hợp nhất bằng EKF dùng cho phản hồi vận tốc
-    bt_loop_duration: 5              # [ms] chu kỳ tick của Behavior Tree
-    default_server_timeout: 10       # [s]  thời gian chờ gọi action server
+    odom_topic: /odometry/filtered   # EKF-fused odometry for velocity feedback
+    bt_loop_duration: 5              # [ms] Behavior Tree tick interval
+    default_server_timeout: 10       # [s] action server call timeout
     default_bt_xml_filename: "/opt/ros/foxy/share/nav2_bt_navigator/behavior_trees/navigate_w_replanning_and_recovery.xml"
-    enable_groot_monitoring: False   # tắt trực quan hóa BT thời gian thực (tiết kiệm CPU)
+    enable_groot_monitoring: False   # disable real-time BT visualization (saves CPU)
     groot_zmq_publisher_port: 1666
     groot_zmq_server_port: 1667
     plugin_lib_names:
@@ -118,16 +118,16 @@ bt_navigator_rclcpp_node:
     use_sim_time: False
 
 # ==================== CONTROLLER SERVER (DWB) ====================
-# Bộ lập lịch cục bộ dựa trên Cửa sổ Động (DWB) — lấy mẫu các cặp (vx, ω),
-# mô phỏng tiến, chấm điểm bằng các hàm critic, xuất cmd_vel tốt nhất.
+# Dynamic Window Approach (DWB) local planner - samples (vx, w) pairs,
+# simulates forward, scores via critics, and outputs best cmd_vel.
 controller_server:
   ros__parameters:
     use_sim_time: False
-    controller_frequency: 20.0       # [Hz] tần suất xuất cmd_vel
+    controller_frequency: 20.0       # [Hz] cmd_vel output frequency
 
-    # Ngưỡng vận tốc dưới mức robot được coi là đứng yên.
+    # Velocity thresholds below which the robot is considered stationary.
     min_x_velocity_threshold: 0.001  # [m/s]
-    min_y_velocity_threshold: 0.001  # [m/s] (không dùng — dẫn động vi sai)
+    min_y_velocity_threshold: 0.001  # [m/s] (unused - diff-drive)
     min_theta_velocity_threshold: 0.001 # [rad/s]
 
     controller_plugins: ["FollowPath"]
@@ -136,113 +136,113 @@ controller_server:
       plugin: "dwb_core::DWBLocalPlanner"
       debug_trajectory_details: False
 
-      # ── Giới hạn vận tốc ──────────────────────────────────────────────────
-      # v_max phần cứng = 0.5 m/s; giảm 30 % vì an toàn → 0.346 m/s
-      min_vel_x: 0.0               # [m/s] không điều khiển lùi
-      min_vel_y: 0.0               # [m/s] không dịch ngang (dẫn động vi sai)
-      max_vel_x: 0.346             # [m/s] giới hạn vận tốc tiến
-      max_vel_y: 0.0               # [m/s] không dịch ngang (dẫn động vi sai)
-      max_vel_theta: 1.643         # [rad/s] giới hạn tốc độ góc (≈ giới hạn phần cứng)
+      # ── Velocity Limits ───────────────────────────────────────────────────
+      # Hardware v_max = 0.5 m/s; reduced by 30% for safety -> 0.346 m/s
+      min_vel_x: 0.0               # [m/s] disable reverse driving
+      min_vel_y: 0.0               # [m/s] no strafing (diff-drive)
+      max_vel_x: 0.346             # [m/s] max forward velocity
+      max_vel_y: 0.0               # [m/s] no strafing (diff-drive)
+      max_vel_theta: 1.643         # [rad/s] max angular velocity (~ hardware limit)
       min_vel_theta: 0.0
-      min_speed_xy: 0.0            # [m/s] tốc độ XY kết hợp tối thiểu
-      max_speed_xy: 0.346          # [m/s] tốc độ XY kết hợp tối đa
+      min_speed_xy: 0.0            # [m/s] min combined XY speed
+      max_speed_xy: 0.346          # [m/s] max combined XY speed
       min_speed_theta: 0.0
 
-      # ── Giới hạn gia tốc / giảm tốc ──────────────────────────────────────
-      # Dốc tăng tốc nhẹ nhàng để ngăn trượt bánh và giảm nhiễu rung IMU.
-      acc_lim_x: 0.0865            # [m/s²]  từ 0 lên tối đa trong ≈ 4 s
-      acc_lim_y: 0.0               # [m/s²]  dẫn động vi sai
-      acc_lim_theta: 1.0           # [rad/s²]
+      # ── Acceleration / Deceleration Limits ──────────────────────────────
+      # Gentle acceleration ramps to prevent wheel slip and reduce IMU vibration noise.
+      acc_lim_x: 0.0865            # [m/s^2] 0 to max in ~4s
+      acc_lim_y: 0.0               # [m/s^2] diff-drive
+      acc_lim_theta: 1.0           # [rad/s^2]
 
-      decel_lim_x: -0.172          # [m/s²]  dốc phanh (gấp 2× gia tốc để dừng chặt hơn)
+      decel_lim_x: -0.172          # [m/s^2] braking ramp (2x accel for tighter stops)
       decel_lim_y: 0.0
-      decel_lim_theta: -0.821      # [rad/s²]
+      decel_lim_theta: -0.821      # [rad/s^2]
 
-      # ── Lấy mẫu quỹ đạo ──────────────────────────────────────────────────
-      vx_samples: 20               # số mẫu vận tốc tuyến tính trong cửa sổ động
-      vy_samples: 0                # không lấy mẫu ngang
-      vtheta_samples: 20           # số mẫu vận tốc góc
+      # ── Trajectory Sampling ───────────────────────────────────────────────
+      vx_samples: 20               # number of linear velocity samples in dynamic window
+      vy_samples: 0                # no strafe sampling
+      vtheta_samples: 20           # number of angular velocity samples
 
-      # ── Mô phỏng tiến ───────────────────────────────────────────────────
-      sim_time: 2.5                # [s]   độ dài chân trời rollout
-      linear_granularity: 0.05     # [m]   bước cung tròn để kiểm tra va chạm
-      angular_granularity: 0.025   # [rad] bước góc để kiểm tra va chạm
-      transform_tolerance: 0.3     # [s]   dung sai tuổi tra cứu TF
-      trans_stopped_velocity: 0.02 # [m/s] ngưỡng tốc độ xác định "robot đứng yên"
-      short_circuit_trajectory_evaluation: True # huỷ chấm điểm ngay khi chạm vùng chi phí chết người
-      stateful: True               # giữ lại hướng tốt nhất cuối cùng qua các chu kỳ tick
+      # ── Forward Simulation ────────────────────────────────────────────────
+      sim_time: 2.5                # [s] rollout horizon length
+      linear_granularity: 0.05     # [m] arc step size for collision checking
+      angular_granularity: 0.025   # [rad] angular step size for collision checking
+      transform_tolerance: 0.3     # [s] TF lookup age tolerance
+      trans_stopped_velocity: 0.02 # [m/s] considered stopped below this threshold
+      short_circuit_trajectory_evaluation: True # abort scoring instantly upon hitting lethal cost
+      stateful: True               # retain last best trajectory across ticks
 
-      # ── Dung sai đích ────────────────────────────────────────────────────
-      xy_goal_tolerance: 0.25      # [m]   dung sai vị trí tại đích
-      yaw_goal_tolerance: 0.25     # [rad] dung sai góc tại đích (~14°)
+      # ── Goal Tolerance ────────────────────────────────────────────────────
+      xy_goal_tolerance: 0.25      # [m] goal position tolerance
+      yaw_goal_tolerance: 0.25     # [rad] goal orientation tolerance (~14 deg)
 
-      # ── Các hàm chấm điểm (critic) ───────────────────────────────────────
+      # ── Scoring Functions (Critics) ───────────────────────────────────────
       critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
 
-      BaseObstacle.scale: 32.0               # phạt khi tiếp cận vật cản chết người/phồng nề
-      PathAlign.scale: 32.0                  # phạt khi lệch hướng so với đường dẫn toàn cục
-      PathAlign.forward_point_distance: 0.1  # [m] khoảng cách nhìn trước để chấm điểm căn chỉnh đường dẫn
-      GoalAlign.scale: 12.0                  # phạt khi lệch hướng so với hướng đến đích
+      BaseObstacle.scale: 32.0               # penalty for nearing lethal/inflated obstacles
+      PathAlign.scale: 32.0                  # penalty for deviating from global path
+      PathAlign.forward_point_distance: 0.1  # [m] lookahead distance for path alignment
+      GoalAlign.scale: 12.0                  # penalty for deviating from goal orientation
       GoalAlign.forward_point_distance: 0.1  # [m]
-      PathDist.scale: 32.0                   # phạt khoảng cách ngang so với đường dẫn toàn cục
-      GoalDist.scale: 24.0                   # phạt khoảng cách Euclid đến đích
-      RotateToGoal.scale: 32.0               # xoay tại chỗ khi gần đến đích
-      RotateToGoal.slowing_factor: 2.0       # hệ số giảm vận tốc trong quá trình xoay
-      RotateToGoal.lookahead_time: -1.0      # âm → vô hiệu hóa
+      PathDist.scale: 32.0                   # penalty for cross-track error to global path
+      GoalDist.scale: 24.0                   # penalty for Euclidean distance to goal
+      RotateToGoal.scale: 32.0               # encourages in-place rotation near goal
+      RotateToGoal.slowing_factor: 2.0       # velocity deceleration factor during rotation
+      RotateToGoal.lookahead_time: -1.0      # negative -> disabled
 
 controller_server_rclcpp_node:
   ros__parameters:
     use_sim_time: False
 
 # ==================== LOCAL COSTMAP ====================
-# Costmap cửa sổ cuộn căn giữa robot — được DWB dùng để tránh va chạm.
+# Rolling window costmap centered on robot - used by DWB for collision avoidance.
 local_costmap:
   local_costmap:
     ros__parameters:
       use_sim_time: False
-      global_frame: odom             # costmap theo dõi robot trong frame odom
+      global_frame: odom             # costmap tracks robot in odom frame
       plugin_names: ["obstacle_layer", "inflation_layer"]
       plugin_types: ["nav2_costmap_2d::ObstacleLayer", "nav2_costmap_2d::InflationLayer"]
-      rolling_window: true           # cửa sổ di chuyển theo robot
-      width: 5                       # [m] chiều rộng cửa sổ
-      height: 5                      # [m] chiều cao cửa sổ
-      resolution: 0.05               # [m/ô lưới]
-      # Đa giác footprint của robot trong frame base_footprint [trước→sau, trái→phải].
+      rolling_window: true           # window moves with robot
+      width: 5                       # [m] window width
+      height: 5                      # [m] window height
+      resolution: 0.05               # [m/cell]
+      # Robot footprint polygon in base_footprint frame [front->back, left->right].
       footprint: "[[0.32, 0.30], [0.32, -0.30], [-0.12, -0.30], [-0.12, 0.30]]"
-      update_frequency: 20.0         # [Hz] phải khớp với controller_frequency
-      publish_frequency: 5.0         # [Hz] tần suất cập nhật RViz
+      update_frequency: 20.0         # [Hz] must match controller_frequency
+      publish_frequency: 5.0         # [Hz] RViz update frequency
 
       obstacle_layer:
         enabled: True
         observation_sources: scan
         scan:
           topic: /scan_filtered
-          max_obstacle_height: 2.0   # [m]  bỏ qua tia phản xạ vượt quá độ cao này (đèn trần, thiết bị trần)
-          clearing: True             # truy vết tia để xóa vùng trống phía sau tia rõ ràng
-          marking: True              # đánh dấu ô bị chiếm khi có tia phản xạ
+          max_obstacle_height: 2.0   # [m] ignore reflections above this height (ceiling lights, fixtures)
+          clearing: True             # raytrace to clear free space
+          marking: True              # mark occupied cells on reflection
           data_type: "LaserScan"
-          raytrace_max_range: 5.5    # [m]  khoảng cách xóa vùng trống tối đa
+          raytrace_max_range: 5.5    # [m] max raytracing range for clearing
           raytrace_min_range: 0.0
-          obstacle_max_range: 5.0    # [m]  khoảng cách đánh dấu vật cản tối đa
+          obstacle_max_range: 5.0    # [m] max obstacle marking range
           obstacle_min_range: 0.0
 
       inflation_layer:
-        cost_scaling_factor: 3.5     # tốc độ suy giảm mũ của chi phí theo khoảng cách từ vật cản
-        inflation_radius: 0.35        # [m]  bán kính phồng nề quanh vật cản
+        cost_scaling_factor: 3.5     # exponential rate of cost decay
+        inflation_radius: 0.35       # [m] inflation radius around obstacles
 
       always_send_full_costmap: True
 
 # ==================== GLOBAL COSTMAP ====================
-# Costmap tĩnh + động toàn bản đồ — được bộ lập lịch toàn cục NavFn/A* sử dụng.
+# Full map static + dynamic costmap - used by NavFn/A* global planner.
 global_costmap:
   global_costmap:
     ros__parameters:
       use_sim_time: False
-      global_frame: map              # neo vào frame bản đồ tĩnh
+      global_frame: map              # anchored to static map frame
       footprint: "[[0.32, 0.30], [0.32, -0.30], [-0.12, -0.30], [-0.12, 0.30]]"
-      resolution: 0.05               # [m/ô lưới]
+      resolution: 0.05               # [m/cell]
       robot_base_frame: base_footprint
-      update_frequency: 8.0          # [Hz] thấp hơn cục bộ (lập lịch lại toàn cục chậm hơn)
+      update_frequency: 8.0          # [Hz] lower than local (global replanning is slower)
       publish_frequency: 2.0         # [Hz]
 
       plugin_names: ["static_layer", "obstacle_layer", "inflation_layer"]
@@ -252,7 +252,7 @@ global_costmap:
         - "nav2_costmap_2d::InflationLayer"
 
       static_layer:
-        map_subscribe_transient_local: True  # dùng QoS latched/transient-local cho topic /map
+        map_subscribe_transient_local: True  # use latched/transient-local QoS for /map topic
 
       obstacle_layer:
         enabled: True
@@ -263,14 +263,14 @@ global_costmap:
           clearing: True
           marking: True
           data_type: "LaserScan"
-          raytrace_max_range: 10.5   # [m]  phạm vi xóa vùng trống rộng hơn trên bản đồ toàn cục
+          raytrace_max_range: 10.5   # [m] wider clearing range for global map
           raytrace_min_range: 0.0
-          obstacle_max_range: 10.0   # [m]  phạm vi đánh dấu vật cản rộng hơn trên bản đồ toàn cục
+          obstacle_max_range: 10.0   # [m] wider obstacle marking range for global map
           obstacle_min_range: 0.0
 
       inflation_layer:
         cost_scaling_factor: 3.5
-        inflation_radius: 0.35        # [m]
+        inflation_radius: 0.35       # [m]
 
       always_send_full_costmap: True
 
@@ -288,17 +288,17 @@ map_server:
     yaml_filename: "/home/nguyenan/mbrobot_ws/src/mobile_robot/maps/lab_demo_map.yaml"
 
 # ==================== PLANNER SERVER ====================
-# Bộ lập lịch toàn cục NavFn — tính toán đường đi không va chạm trên costmap toàn cục.
+# NavFn Global Planner - computes collision-free path on global costmap.
 planner_server:
   ros__parameters:
     use_sim_time: False
-    expected_planner_frequency: 5.0  # [Hz] tần suất lập lịch lại mục tiêu
+    expected_planner_frequency: 5.0  # [Hz] goal replanning frequency
     planner_plugins: ["GridBased"]
     GridBased:
       plugin: "nav2_navfn_planner/NavfnPlanner"
-      tolerance: 0.25                 # [m]  dung sai đích cho tìm kiếm điểm cuối đường dẫn
-      use_astar: true                # A* (true) nhanh hơn Dijkstra cho bản đồ trong nhà
-      allow_unknown: False           # không lập lịch xuyên qua các ô chưa khám phá
+      tolerance: 0.25                # [m] endpoint search tolerance
+      use_astar: true                # A* is faster than Dijkstra for indoor maps
+      allow_unknown: False           # forbid planning through unknown space
 
 planner_server_rclcpp_node:
   ros__parameters:
@@ -309,40 +309,40 @@ navfn_planner_GetCostmap_client:
     use_sim_time: False
 
 # ==================== RECOVERIES SERVER ====================
-# Thực thi các hành vi phục hồi khi robot bị kẹt hoặc không thể đến đích.
+# Executes recovery behaviors when robot is stuck or goal is unreachable.
 recoveries_server:
   ros__parameters:
     use_sim_time: False
     costmap_topic: local_costmap/costmap_raw
     footprint_topic: local_costmap/published_footprint
-    cycle_frequency: 10.0            # [Hz] tần suất vòng lặp thực thi phục hồi
+    cycle_frequency: 10.0            # [Hz] recovery execution loop frequency
 
     recovery_plugins: ["spin", "backup", "wait"]
     spin:
-      plugin: "nav2_recoveries/Spin"    # xoay tại chỗ để quan sát xung quanh
+      plugin: "nav2_recoveries/Spin"    # rotate in-place to clear space
     backup:
-      plugin: "nav2_recoveries/BackUp"  # lùi một khoảng ngắn để giải phóng robot
+      plugin: "nav2_recoveries/BackUp"  # reverse short distance to un-stick
     wait:
-      plugin: "nav2_recoveries/Wait"    # tạm dừng để vật cản động di chuyển khỏi đường
+      plugin: "nav2_recoveries/Wait"    # pause to let dynamic obstacles pass
 
     global_frame: odom
     robot_base_frame: base_footprint
-    transform_tolerance: 0.1         # [s]  dung sai TF trong quá trình thực thi phục hồi
+    transform_tolerance: 0.1         # [s] TF tolerance during recovery
 
-    simulate_ahead_time: 2.0         # [s]  kiểm tra va chạm tiến trước khi thực thi phục hồi
+    simulate_ahead_time: 2.0         # [s] forward collision check before recovery execution
 
-    # Giới hạn bao vận tốc góc áp dụng trong quá trình phục hồi Spin.
-    max_rotational_vel: 1.0          # [rad/s] giới hạn trên
-    min_rotational_vel: 0.4          # [rad/s] giới hạn dưới để thắng ma sát tĩnh
-    rotational_acc_lim: 0.8          # [rad/s²] dốc nhẹ nhàng để giảm nhiễu IMU
+    # Angular velocity envelope for Spin recovery.
+    max_rotational_vel: 1.0          # [rad/s] max angular speed
+    min_rotational_vel: 0.4          # [rad/s] min angular speed to overcome static friction
+    rotational_acc_lim: 0.8          # [rad/s^2] gentle acceleration to reduce IMU noise
 
 
 # ==================== LIFECYCLE MANAGER ====================
-# Điều phối các chuyển trạng thái vòng đời configure → activate → deactivate của các node Nav2.
+# Orchestrates Nav2 node lifecycle transitions (configure -> activate -> deactivate).
 lifecycle_manager:
   ros__parameters:
     use_sim_time: False
-    autostart: True                  # tự động kích hoạt tất cả node được quản lý khi khởi động
+    autostart: True                  # auto-activate all managed nodes on startup
     node_names:
       - map_server
       - amcl

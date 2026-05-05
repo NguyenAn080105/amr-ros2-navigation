@@ -2,93 +2,93 @@ slam_toolbox:
   ros__parameters:
 
     # ================================================================
-    # Plugin params (Các tham số của bộ giải tối ưu hóa đồ thị đồ thị - Pose Graph Optimization)
+    # Plugin params (Pose Graph Optimization solver parameters)
     # ================================================================
-    solver_plugin: solver_plugins::CeresSolver      # Sử dụng thư viện Ceres Solver của Google để tối ưu hóa đồ thị. Phù hợp nhất cho ROS 2.
-    ceres_linear_solver: SPARSE_NORMAL_CHOLESKY     # Thuật toán giải hệ phương trình tuyến tính cho ma trận thưa (nhanh và rất hiệu quả cho SLAM 2D).
-    ceres_preconditioner: SCHUR_JACOBI              # Bộ tiền điều kiện giúp thuật toán toán hội tụ nhanh hơn, giảm thời gian tính toán cho Jetson.
-    ceres_trust_strategy: LEVENBERG_MARQUARDT       # Phương pháp tối ưu phi tuyến (kết hợp Gauss-Newton và Gradient Descent), rất ổn định.
-    ceres_dogleg_type: TRADITIONAL_DOGLEG           # Thuật toán phụ trợ cho chiến lược vùng tin cậy (trust region).
-    ceres_loss_function: None                       # Hàm mất mát để giảm thiểu nhiễu (outliers). Để None ở điều kiện trong nhà là hợp lý vì môi trường ít động.
+    solver_plugin: solver_plugins::CeresSolver 
+    ceres_linear_solver: SPARSE_NORMAL_CHOLESKY
+    ceres_preconditioner: SCHUR_JACOBI
+    ceres_trust_strategy: LEVENBERG_MARQUARDT
+    ceres_dogleg_type: TRADITIONAL_DOGLEG
+    ceres_loss_function: None
 
     # ================================================================
-    # ROS Parameters (Cấu hình topic và cây TF - Transform Tree)
+    # ROS Parameters (Topics and Transform Tree config)
     # ================================================================
-    odom_frame: odom           # Khung tọa độ odometry (từ bộ lọc EKF kết hợp dữ liệu vận tốc STM32 gửi lên và IMU BNO055).
-    map_frame: map             # Khung tọa độ của bản đồ tổng thể cố định. SLAM Toolbox sẽ publish TF từ map -> odom.
-    base_frame: base_footprint # Hình chiếu tâm robot xuống mặt đất. (TF tree: map -> odom -> base_footprint -> base_link -> laser/imu).
-    scan_topic: /scan_filtered # Topic lấy dữ liệu LiDAR (khuyến cáo dùng pointcloud đã qua bộ lọc filter nhiễu chân robot hoặc nhiễu chói).
-    mode: mapping              # Chế độ chạy: 'mapping' (tạo bản đồ mới) hoặc 'localization' (chỉ định vị trên bản đồ đã có).
+    odom_frame: odom
+    map_frame: map
+    base_frame: base_footprint
+    scan_topic: /scan_filtered
+    mode: mapping              # Operating mode: 'mapping' (create new map) or 'localization' (localize in existing map).
 
-    map_update_interval: 4.0          # (Giây) Tần suất cập nhật lưới bản đồ (Occupancy Grid) lên topic /map. Cập nhật mỗi 1 giây giúp RViz trên Laptop hiển thị mượt mà.
+    map_update_interval: 4.0          # [s] Occupancy Grid update frequency to /map topic. 
 
-    # Các điều kiện "kích hoạt" (trigger) xử lý thêm 1 node scan mới vào bản đồ:
-    minimum_travel_distance: 0.2      # (Mét) Xử lý scan mới khi robot đi được thêm 0.2m. Rất nhạy để bắt kịp chuyển động.
-    minimum_time_interval: 0.5        # (Giây) Mốc thời gian tối thiểu để xử lý một scan.
-    minimum_travel_heading: 0.5       # (Radian) Xử lý scan mới khi xoay được ~30 độ. Ở chế độ diff-drive (quay tại chỗ), tham số này rất quan trọng để không bỏ lỡ góc cua.
+    # Triggers to process a new scan node into the pose graph:
+    minimum_travel_distance: 0.2      # [m] Process new scan after 0.2m of travel. Highly responsive.
+    minimum_time_interval: 0.5        # [s] Minimum time interval to process a scan.
+    minimum_travel_heading: 0.5       # [rad] Process new scan after ~30 deg rotation. Crucial for diff-drive to not miss corners.
     
-    throttle_scans: 1                 # Số scan bị bỏ qua. Bằng 1 nghĩa là xử lý 100% scan. (Xavier rất mạnh nên không cần drop/skip scan).
+    throttle_scans: 1                 # Scans to skip (1 = process 100% of scans, suitable for Xavier).
 
-    transform_publish_period: 0.02    # (Giây) Tốc độ SLAM publish TF odom->map (0.02s = 50Hz). Cần tần số cao để Navigation stack (Controller) chạy trơn tru.
-
-    # ================================================================
-    # CHẤT LƯỢNG MAP
-    # ================================================================
-    resolution: 0.03                  # (Mét/pixel) Kích thước 1 ô cell bản đồ = 3cm. Chi tiết hơn so với mặc định (5cm), cho phép Navigation tránh các chướng ngại vật nhỏ hiệu quả. Bộ nhớ Jetson 16GB hoàn toàn đáp ứng được.
-    max_laser_range: 20.0             # (Mét) Tầm quét tối đa của LiDAR S2E. Hợp lý cho không gian trong nhà rộng.
+    transform_publish_period: 0.02    # [s] SLAM TF odom->map publish rate (0.02s = 50Hz) for smooth Navigation.
 
     # ================================================================
-    # SCAN MATCHING — (So khớp dữ liệu LiDAR hiện tại với bản đồ)
+    # MAP QUALITY
     # ================================================================
-    use_scan_matching: true           # Cho phép SLAM sửa sai số odometry từ bánh xe/IMU bằng cách so khớp tia laser.
-    use_scan_barycenter: true         # Dùng trọng tâm của đám mây điểm để cải thiện tính ổn định khi matching.
-
-    scan_buffer_size: 100             # Số lượng scan giữ trong bộ nhớ đệm tạm thời (history). Tăng lên 100 giúp đối phó với trượt bánh đột ngột tốt hơn.
-    scan_buffer_maximum_scan_distance: 12.0   # (Mét) Những điểm laser ở quá xa (trên 12m) sẽ không được lưu vào buffer cục bộ.
-
-    link_scan_maximum_distance: 2.0           # (Mét) Khoảng cách tối đa giữa 2 poses để hệ thống thử thiết lập kết nối (constraint) giữa chúng trong pose graph.
-    link_match_minimum_response_fine: 0.05    # Ngưỡng tối thiểu của điểm số so khớp (match score) để tạo ra kết nối. Đặt 0.05 giúp các pose dễ liên kết với nhau hơn.
+    resolution: 0.03                  # [m/cell] Grid resolution (3cm). Higher detail than default (5cm) for better obstacle avoidance. Jetson 16GB handles this well.
+    max_laser_range: 20.0             # [m] Max LiDAR range for mapping. Suitable for wide indoor spaces (RPLIDAR S2E).
 
     # ================================================================
-    # LOOP CLOSURE — (Phát hiện lại điểm cũ, đóng vòng để xoá sai số tích luỹ)
+    # SCAN MATCHING (Aligning current LiDAR data with the map)
     # ================================================================
-    do_loop_closing: true                     # Kích hoạt đóng vòng. Rất cần thiết khi chạy bản đồ rộng.
-    loop_search_maximum_distance: 4.0         # (Mét) Bán kính không gian tìm kiếm khả năng đóng vòng. Tăng lên 4m giúp "bắt" được vị trí cũ ngay cả khi sai số odometry (drift) khá lớn.
-    loop_match_minimum_chain_size: 8          # Cần khớp thành công liên tiếp 8 scan liền nhau để xác nhận đó đúng là một vòng lặp (tránh nhận diện sai các hành lang giống nhau).
-    loop_match_maximum_variance_coarse: 3.0   # Độ biến thiên phương sai tối đa cho phép ở vòng tìm kiếm thô.
-    loop_match_minimum_response_coarse: 0.25  # Ngưỡng điểm thấp nhất chấp nhận khi tìm kiếm thô (hạ xuống 0.25 giúp "dễ thở" hơn khi phát hiện điểm quen).
-    loop_match_minimum_response_fine: 0.35    # Ngưỡng điểm thấp nhất chấp nhận khi tìm kiếm tinh.
+    use_scan_matching: true           # Enable scan matching to correct wheel/IMU odometry drift.
+    use_scan_barycenter: true         # Use pointcloud barycenter to improve matching stability.
+
+    scan_buffer_size: 100             # Scans retained in history buffer. Increased to 100 to handle sudden wheel slips better.
+    scan_buffer_maximum_scan_distance: 12.0   # [m] Laser points beyond 12m are excluded from the local buffer.
+
+    link_scan_maximum_distance: 2.0           # [m] Max distance between 2 poses to attempt establishing a constraint in the pose graph.
+    link_match_minimum_response_fine: 0.05    # Minimum match score threshold to create a link. Lowered to 0.05 to facilitate easier pose connections.
 
     # ================================================================
-    # CORRELATION — (Tinh chỉnh bộ tìm kiếm khi Scan Matching)
+    # LOOP CLOSURE (Detecting previously visited areas to eliminate drift)
     # ================================================================
-    correlation_search_space_dimension: 0.8         # (Mét) Không gian tìm kiếm so khớp ±80cm. Đã tăng gấp đôi để SLAM vẫn tìm lại được góc khớp đúng ngay cả khi Odometry bị giật/trượt.
-    correlation_search_space_resolution: 0.005      # (Mét) Độ phân giải tìm kiếm = 5mm. Vô cùng chi tiết, tốn CPU nhưng Jetson AGX Xavier chạy mượt.
-    correlation_search_space_smear_deviation: 0.05  # Độ làm mượt (smearing) không gian tìm kiếm, giúp thuật toán không bị mắc kẹt vào các giá trị tối ưu cục bộ giả mạo.
+    do_loop_closing: true                     # Enable loop closure. Essential for large maps.
+    loop_search_maximum_distance: 4.0         # [m] Search radius for loop closure. Increased to 4m to catch old areas despite significant drift.
+    loop_match_minimum_chain_size: 8          # Requires 8 consecutively successful scan matches to confirm a loop (prevents false positives in similar corridors).
+    loop_match_maximum_variance_coarse: 3.0   # Max variance allowed during coarse search phase.
+    loop_match_minimum_response_coarse: 0.25  # Minimum acceptable score for coarse search (lowered to 0.25 to catch familiar points easier).
+    loop_match_minimum_response_fine: 0.35    # Minimum acceptable score for fine search.
 
-    # Tương tự như trên nhưng dành cho Loop Closure (Không gian rộng và thô hơn)
-    loop_search_space_dimension: 8.0                # (Mét) Tìm kiếm đóng vòng trong ô rộng tới 8m.
-    loop_search_space_resolution: 0.05              # (Mét) Độ phân giải đóng vòng 5cm (đủ để nhận diện sơ bộ trước khi tối ưu).
+    # ================================================================
+    # CORRELATION (Fine-tuning the search space during Scan Matching)
+    # ================================================================
+    correlation_search_space_dimension: 0.8         # [m] Search space bounds (+- 80cm). Doubled to help SLAM recover alignment after sudden odometry jerks.
+    correlation_search_space_resolution: 0.005      # [m] Search resolution (5mm). Extremely detailed, CPU-intensive but Jetson AGX Xavier handles it smoothly.
+    correlation_search_space_smear_deviation: 0.05  # Search space smearing deviation to prevent algorithms from getting stuck in false local optima.
+
+    # Similar parameters for Loop Closure (Wider and coarser space)
+    loop_search_space_dimension: 8.0                # [m] Loop search bounds up to 8m.
+    loop_search_space_resolution: 0.05              # [m] Loop search resolution (5cm).
     loop_search_space_smear_deviation: 0.03
 
     # ================================================================
-    # SCAN MATCHER PENALTIES (Trọng số Phạt - Đánh giá độ tin cậy)
+    # SCAN MATCHER PENALTIES (Confidence evaluation & weighting)
     # ================================================================
-    distance_variance_penalty: 0.5    # Điểm phạt nếu phương sai khoảng cách cao. (Tin tưởng Odometry về tịnh tiến 1 phần).
-    angle_variance_penalty: 1.0       # Điểm phạt nếu phương sai góc quay cao. Đặt mức 1.0 nghĩa là ưu tiên tin tưởng vào Odometry về góc. (Vì IMU BNO055 cung cấp yaw khá chính xác).
-    fine_search_angle_offset: 0.00349 # (Radian) Bước nhảy góc khi quét tinh (khoảng 0.2 độ).
-    coarse_search_angle_offset: 0.523 # (Radian) Góc tìm kiếm thô lớn (lên tới 30 độ). Rất hữu ích khi xe quay đột ngột khiến EKF dự đoán lệch.
-    coarse_angle_resolution: 0.0349   # (Radian) Độ phân giải góc khi quét thô (~2 độ).
-    minimum_angle_penalty: 0.9        # Phạt cơ sở cho góc.
-    minimum_distance_penalty: 0.5     # Phạt cơ sở cho dịch chuyển.
-    use_response_expansion: true      # Cho phép mở rộng không gian tìm kiếm nếu thuật toán đánh giá chưa đủ tự tin.
+    distance_variance_penalty: 0.5    # Penalty for high distance variance (Moderate trust in Odometry translation).
+    angle_variance_penalty: 1.0       # Penalty for high angle variance. 1.0 heavily trusts Odometry heading (BNO055 provides highly accurate Yaw).
+    fine_search_angle_offset: 0.00349 # [rad] Angular step for fine search (~0.2 deg).
+    coarse_search_angle_offset: 0.523 # [rad] Large coarse search angle (up to 30 deg). Useful for correcting EKF predictions after sudden rotations.
+    coarse_angle_resolution: 0.0349   # [rad] Angular resolution for coarse search (~2 deg).
+    minimum_angle_penalty: 0.9        # Baseline angle penalty.
+    minimum_distance_penalty: 0.5     # Baseline translation penalty.
+    use_response_expansion: true      # Allow expanding the search space if the evaluation lacks confidence.
 
     # ================================================================
-    # SYSTEM (Tài nguyên và độ trễ)
+    # SYSTEM (Resources and Latency)
     # ================================================================
-    transform_timeout: 1.0            # (Giây) Thời gian cho phép đợi TF. Rất quan trọng trong hệ thống phân tán. Tránh sập node nếu mạng WiFi bị nghẽn vài mili-giây.
-    tf_buffer_duration: 50.0          # (Giây) Lưu trữ bộ nhớ đệm TF trong 50 giây để đồng bộ hóa các thông tin về thời gian tốt hơn.
-    stack_size_to_use: 40000000       # (Bytes) Cấp phát 40MB RAM vùng nhớ stack cho mỗi luồng xử lý của bộ solver Ceres.
+    transform_timeout: 1.0            # [s] Max time to wait for TF. Crucial in distributed systems to prevent node crashes due to network jitter.
+    tf_buffer_duration: 50.0          # [s] Cache TF history for 50s for better time synchronization.
+    stack_size_to_use: 40000000       # [Bytes] Allocate 40MB stack memory per Ceres solver thread.
     
-    debug_logging: false              # Tắt ghi log ra ổ cứng. Điều này giúp giảm thiểu bottleneck I/O cho bộ nhớ flash của Jetson.
-    enable_interactive_mode: false    # Tắt service tương tác sửa map bằng tay qua Rviz rviz_plugin. Để false giúp dồn toàn bộ CPU cho auto-mapping.
+    debug_logging: false              # Disable debug logging to disk. Reduces I/O bottleneck on Jetson's flash memory.
+    enable_interactive_mode: false    # Disable manual map correction service via RViz. Dedicates full CPU to auto-mapping.

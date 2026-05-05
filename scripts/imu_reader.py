@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-IMU Data Reader Node for ROS 2 Dashing
-Đọc và xử lý dữ liệu từ IMU sensor
-imu_reader sẽ đọc dữ liệu từ IMU, sau đó dữ liệu này được node ekf_localization sử dụng để kết hợp với Wheel Odometry, 
-giúp robot định vị chính xác hơn khi di chuyển trong môi trường mô phỏng
+IMU Data Reader Node for ROS 2.
+Reads and parses IMU sensor data. This output is used by the ekf_localization node 
+to fuse with Wheel Odometry, improving robot localization precision.
 """
 
 import rclpy
@@ -17,7 +16,7 @@ class IMUReader(Node):
     def __init__(self):
         super().__init__('imu_reader')
         
-        # Subscriber cho IMU data
+        # IMU Data Subscriber
         self.imu_subscription = self.create_subscription(
             Imu,
             'imu/data',
@@ -25,14 +24,14 @@ class IMUReader(Node):
             qos_profile_sensor_data
         )
         
-        # Publisher cho orientation (góc Euler)
+        # Euler Orientation Publisher
         self.euler_publisher = self.create_publisher(
             Vector3,
             'imu/euler',
             10
         )
         
-        # Variables để lưu trữ dữ liệu
+        # Data storage variables
         self.orientation = None
         self.angular_velocity = None
         self.linear_acceleration = None
@@ -43,7 +42,7 @@ class IMUReader(Node):
 
     def quaternion_to_euler(self, x, y, z, w):
         """
-        Chuyển đổi từ Quaternion sang góc Euler (roll, pitch, yaw)
+        Converts Quaternion to Euler angles (roll, pitch, yaw)
         
         Args:
             x, y, z, w: Quaternion components
@@ -72,17 +71,16 @@ class IMUReader(Node):
 
     def imu_callback(self, msg):
         """
-        Callback function khi nhận được dữ liệu IMU
+        Callback function when IMU data is received
         
         Args:
             msg: sensor_msgs/Imu message
         """
-        # Lưu dữ liệu
         self.orientation = msg.orientation
         self.angular_velocity = msg.angular_velocity
         self.linear_acceleration = msg.linear_acceleration
         
-        # Chuyển đổi Quaternion sang Euler
+        # Convert Quaternion to Euler
         roll, pitch, yaw = self.quaternion_to_euler(
             msg.orientation.x,
             msg.orientation.y,
@@ -90,7 +88,7 @@ class IMUReader(Node):
             msg.orientation.w
         )
         
-        # Chuyển đổi sang độ
+        # Convert to degrees
         roll_deg = math.degrees(roll)
         pitch_deg = math.degrees(pitch)
         yaw_deg = math.degrees(yaw)
@@ -102,7 +100,7 @@ class IMUReader(Node):
         euler_msg.z = yaw
         self.euler_publisher.publish(euler_msg)
         
-        # In thông tin (có thể comment out nếu không cần)
+        # Print data (can be commented out if not needed)
         # self.get_logger().info(
         #     f'\n'
         #     f'=== IMU Data ===\n'

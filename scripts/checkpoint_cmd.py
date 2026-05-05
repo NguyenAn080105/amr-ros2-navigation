@@ -38,14 +38,12 @@ from std_msgs.msg import String, Int32
 # ============================================================
 #  Display policy
 # ============================================================
-# True  : dùng màu ANSI cho terminal dễ nhìn.
-# False : không dùng màu, phù hợp khi ghi log ra file.
 USE_COLOR = True
 
-# Không in lặp lại cùng một status từ /robot/status_message.
+# Prevent printing identical status messages from /robot/status_message continuously.
 PRINT_STATUS_MESSAGE = True
 
-# Nếu navigator_v2.py chưa chạy, chỉ cảnh báo 1 lần để tránh spam.
+# Warn only once if navigator_v2.py is not running to avoid spamming the console.
 WARN_NO_NAVIGATOR_ONCE = True
 
 

@@ -19,8 +19,7 @@ find_package(std_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 
-# ── Python node: imu_reader ────────────────────────────────────────────────────
-# Cài imu_reader.py dưới dạng executable (ros2 run mobile_robot imu_reader)
+# ── Python node: imu_reader ───────────────────────────────────────────────────
 ament_python_install_package(${PROJECT_NAME})
 
 # ── Install IMU ────────────────────────────────────────────────────────
@@ -40,6 +39,7 @@ install(
     scripts/session_logger.py
     scripts/ultrasonic_fusion_node.py
     scripts/endurance_test.py
+    scripts/jetson_sensor_bridge.py
   DESTINATION lib/${PROJECT_NAME}
 )
 # ── Install launch files ────────────────────────────────────────────────────────
@@ -57,10 +57,6 @@ install(DIRECTORY urdf/
   DESTINATION share/${PROJECT_NAME}/urdf
 )
 
-# ── Install jetson_sensor_bridge ───────────────────────────────────────────────────────
-install(PROGRAMS scripts/jetson_sensor_bridge.py
-DESTINATION lib/${PROJECT_NAME}
-RENAME jetson_sensor_bridge.py)
 # ── Install meshes ─────────────────────────────────────────────────────────────
 install(DIRECTORY meshes/
   DESTINATION share/${PROJECT_NAME}/meshes
@@ -81,7 +77,6 @@ install(DIRECTORY maps/
 # ── Linting / Tests ────────────────────────────────────────────────────────────
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
-  # Exclude copyright/license checks for rapid development; enable in production.
   set(ament_cmake_copyright_FOUND TRUE)
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()

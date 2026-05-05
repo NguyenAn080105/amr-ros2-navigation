@@ -374,16 +374,15 @@ def generate_launch_description():
         LogInfo(msg='[nav] ═══ Starting Full Hardware Bringup + EKF + Nav2 ═══'),
         LogInfo(msg='[nav] [0.0s] Starting RSP, wheel_odom, bno055, lidar, sensor_bridge...'),
 
-        # t = 0s: Các node cần khởi động sớm nhất
-        robot_state_publisher,      # TF tree sẵn sàng ngay
-        wheel_odom_node,            # /odom từ STM32
-        bno055_node,                # /imu/data từ I2C
-        lidar_node,                 # /scan từ RPLIDAR UDP
-        # jetson_sensor_bridge_node,  # /ultrasonic/* từ UART
+        robot_state_publisher,
+        wheel_odom_node,
+        bno055_node,
+        lidar_node,
+        jetson_sensor_bridge_node,
 
         delayed_jsp,
         delayed_imu_reader,
-        # delayed_ultrasonic_fusion,
+        delayed_ultrasonic_fusion,
         delayed_ekf,
         delayed_scan_filter,
         delayed_nav2,

@@ -5,15 +5,27 @@ from sensor_msgs.msg import Range
 import serial
 
 # [F0, F1, F2, L, R, B0, B1] → sensor fusion
+# INDEX_TO_SENSOR = {
+#     0: 'us_mid_2_left',
+#     1: 'us_bot_right',	
+#     2: 'us_mid_1_right',
+#     3: 'us_mid_1_left',
+#     4: 'us_top_right',
+#     5: 'us_bot_left',
+#     6: 'us_mid_2_right',
+# }
+
+# [F0, F1, F2, L, R, B0, B1] → sensor fusion
 INDEX_TO_SENSOR = {
-    0: 'us_mid_2_left',
+    # 0: 'us_mid_2_left',
     1: 'us_bot_right',	
-    2: 'us_mid_1_right',
-    3: 'us_mid_1_left',
+    2: 'us_mid_left',
+    3: 'us_top_left',
     4: 'us_top_right',
     5: 'us_bot_left',
-    6: 'us_mid_2_right',
+    6: 'us_mid_right',
 }
+
 
 class UltrasonicNode(Node):
     def __init__(self):

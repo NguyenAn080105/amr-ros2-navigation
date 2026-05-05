@@ -1,7 +1,7 @@
 scan_to_scan_filter_chain:
   ros__parameters:
     
-    # Bộ lọc 1: Box Filter - Loại bỏ các tia laser bắn trúng thân/bánh xe robot
+    # Filter 1: Box Filter - Removes LiDAR beams hitting the robot body/wheels
     filter1:
       name: box_filter
       type: laser_filters/LaserScanBoxFilter
@@ -15,44 +15,47 @@ scan_to_scan_filter_chain:
         min_z: -0.05
         max_z: 1.40
 
-    # Bộ lọc 2: Range Filter - Giới hạn tầm nhìn LiDAR
+    # Filter 2: Range Filter - Limits LiDAR field of view
     filter2:
       name: range_filter
       type: laser_filters/LaserScanRangeFilter
       params:
-        use_message_range_limits: false    # Bỏ qua giới hạn gốc của phần cứng (RPLIDAR S2E là 30m)
-        lower_threshold: 0.06              # Giới hạn dưới: 6cm
-        upper_threshold: 15.0              # Giới hạn trên: 15 mét
+        use_message_range_limits: false    # Ignore hardware limits (RPLIDAR S2E is 30m)
+        lower_threshold: 0.06              # Lower limit: 6cm
+        upper_threshold: 15.0              # Upper limit: 15m
         
-        # RẤT QUAN TRỌNG: Xử lý các tia ngoài viền
-        lower_replacement_value: -.inf     # Các tia < 6cm sẽ bị gán thành -vô cùng (bỏ qua)
-        upper_replacement_value: .inf      # Các tia > 15m sẽ bị gán thành +vô cùng (Nav2 hiểu là không gian trống, không phải vật cản)
-    # Phần 2: XÓA 60° → 70°
+        # CRITICAL: Handle out-of-bound beams
+        lower_replacement_value: -.inf     # Beams < 6cm set to -inf (ignored)
+        upper_replacement_value: .inf      # Beams > 15m set to +inf (Nav2 considers this free space, not obstacles)
+        
+    # Filter 3: Removes 60° → 70°
     filter3:
       name: remove_60_to_70
       type: laser_filters/LaserScanAngularBoundsFilterInPlace
       params:
         lower_angle:  1.68806   # 96.7°
         upper_angle:  1.88495   # 107.9°
-        invert: false          # XÓA vùng nằm TRONG khoảng này
+        invert: false           # Clears beams IN this range
 
-# Phần 4: XÓA 290° → 300° (= -70° → -60°)
+    # Filter 4: Removes 290° → 300° (= -70° → -60°)
     filter4:
       name: remove_290_to_300
       type: laser_filters/LaserScanAngularBoundsFilterInPlace
       params:
-       lower_angle:   -1.93895 #  
-       upper_angle:  -1.53806 # 
-       invert: false          # XÓA vùng nằm TRONG khoảng này
+       lower_angle:  -1.93895 
+       upper_angle:  -1.53806 
+       invert: false            # Clears beams IN this range
+       
+    # Filter 5: Removes 291° → 300°
     filter5:
       name: remove_291_to_300
       type: laser_filters/LaserScanAngularBoundsFilterInPlace
       params:
-       lower_angle:   -1.35895 #  
-       upper_angle:  -0.37806 # 
-       invert: false          # XÓA vùng nằm TRONG khoảng này
+       lower_angle:  -1.35895 
+       upper_angle:  -0.37806 
+       invert: false            # Clears beams IN this range
        
-    # Cấu hình đồng bộ TF
+    # TF Synchronization Config
     tf_message_filter_target_frame: base_footprint
     tf_message_filter_queue_size: 20
     tf_message_filter_tolerance: 0.15
