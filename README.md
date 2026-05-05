@@ -31,26 +31,21 @@
 ### SLAM — Real-world Map Building
 > Occupancy grid map built using `slam_toolbox` on the actual CE faculty corridor.
 
-<!-- TODO: Add map screenshot -->
-![SLAM Map](assets/map_e6.png)
+<img src="assets/map_e6.png" alt="SLAM Map" height="800"/>
 
 ---
 
 ### Localization & TF Tree in RViz
 > AMCL particle cloud converging on the pre-built map. Full TF chain: `map → odom → base_footprint → sensors`.
 
-<!-- TODO: Add RViz TF screenshot -->
-![RViz TF Tree](assets/rviz_tf.png)
-
----
-
+<img src="assets/rviz_tf.png" alt="RViz TF Tree" width="800" />
 <!-- ### Autonomous Navigation
 > Nav2 planning a collision-free path to a target checkpoint. Local costmap reacting to real obstacles.
 
 <!-- TODO: Add RViz navigation screenshot -->
-![RViz Navigation](assets/rviz_nav.png)
+<!-- ![RViz Navigation](assets/rviz_nav.png) -->
 
---- -->
+---
 
 ## 📌 What This Robot Does
 
@@ -68,20 +63,34 @@
 This robot is the physical core of a larger multi-team service robot system:
 
 ```
-╔══════════════════════════════════════════════════════════════════╗
-║                  Grand Project — System Overview                 ║
-╠══════════════════╦═══════════════════════╦═══════════════════════╣
-║     App Team     ║     ROS Team (this)   ║       AI Team         ║
-║                  ║                       ║                       ║
-║ Touchscreen UI   ║ SLAM, Localization,   ║ On-device Chatbot     ║
-║ on robot display ║ Navigation, Hardware  ║ embedded in App UI    ║
-║                  ║ on Jetson AGX Xavier  ║                       ║
-║ Sends commands   ║ Exposes REST API ───► ║                       ║
-║ via REST API     ║ publishes robot state ║                       ║
-╚══════════════════╩═══════════════════════╩═══════════════════════╝
+╔══════════════════════════════════════════════════════════════════════╗
+║                    Grand Project — System Overview                   ║
+╠══════════════════════╦═══════════════════════╦═══════════════════════╣
+║   App (UX/UI) Team   ║       ROS Teamm       ║        AI Team        ║
+║                      ║                       ║                       ║
+║  Touchscreen UI on   ║  SLAM, Localization,  ║  On-device Chatbot    ║
+║  robot display:      ║  Navigation, Hardware ║  integrated into      ║
+║  • Direction View    ║  integration on       ║  the App UI           ║
+║  • Running View      ║  Jetson AGX Xavier    ║                       ║
+║  • Chatbot UI        ║                       ║                       ║
+║                      ║  Exposes REST API  →  ║                       ║
+║  Sends go/stop/      ║  receives commands,   ║                       ║
+║  continue/reset via  ║  publishes robot      ║                       ║
+║  REST API calls      ║  state back to App    ║                       ║
+╚══════════════════════╩═══════════════════════╩═══════════════════════╝
 ```
 
 The App team's touchscreen UI calls our navigation API. When a user taps a destination, our `navigator.py` state machine receives the command and dispatches it to Nav2. The AI Chatbot, embedded in the same UI, allows users to ask about the robot's current status.
+
+### 🤖 ROS Team — Full Scope
+
+| Layer | Responsibility |
+|---|---|
+| **Simulation** | Gazebo world, URDF/Xacro modeling, sensor plugins, costmap validation |
+| **SLAM** | `slam_toolbox` for map building; pre-built maps stored per floor |
+| **Localization** | AMCL (Monte Carlo particle filter) + EKF (wheel odom + IMU fusion) |
+| **Navigation** | Nav2: NavFn A* global planner, DWB local planner, BT navigator, recoveries |
+| **Hardware Integration** | Sensor drivers, motor bridge, safety layer, sequenced bringup |
 
 <!-- ### 👥 ROS Team
 
@@ -94,7 +103,7 @@ The App team's touchscreen UI calls our navigation API. When a user taps a desti
 
 ---
 
-## 🔧 My Contributions (This Repository)
+## 🔧 My Personal Contributions
 
 | Area | What I Built |
 |---|---|
@@ -225,11 +234,10 @@ The `navigator.py` state machine accepts 4 commands and manages the full navigat
 
 | ID | Location | Coordinates (map frame) |
 |---|---|---|
-| `0` | **Home** (charging dock) | (0.000, 0.000) |
-| `1` | Library | (3.978, 1.584) |
-| `2` | Meeting Room | (4.003, −1.615) |
-| `3` | Principal's Office | (−4.061, 1.504) |
-| `4` | Student Affairs | (−4.067, −1.580) |
+| `0` | LAB Room (**Home**) | (−0.020, −0.002) |
+| `1` | Elevator | (−4.143, 6.675) |
+| `2` | Meeting Room (E6.3) | (3.197, 17.291) |
+| `3` | Dean's Room | (5.027, 23.810) |
 
 ---
 
@@ -241,7 +249,7 @@ The `navigator.py` state machine accepts 4 commands and manages the full navigat
 # Both Jetson and laptop must share the same config
 export ROS_DOMAIN_ID=42
 export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-source ~/ros2_ws/install/setup.bash
+source ~/ros2_ws/install/setup.bashs
 ```
 
 ### Build

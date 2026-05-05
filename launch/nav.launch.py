@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# launch/nav_launch.py
 # ──────────────────────────────────────────────────────────────────────────────
 # Run on JETSON AGX Xavier — Full Hardware Bringup + EKF + Nav2
 #

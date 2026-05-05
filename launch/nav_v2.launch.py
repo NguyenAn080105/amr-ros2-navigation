@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# launch/nav_v2_launch.py
 # ──────────────────────────────────────────────────────────────────────────────
 # Run on JETSON AGX Xavier — Full Hardware Bringup + EKF + Nav2
 #
@@ -168,13 +167,6 @@ def generate_launch_description():
     # ══════════════════════════════════════════════════════════════════════════
     # NODE 5 — Jetson Sensor Bridge (Ultrasonic UART reader)           [t = 0s]
     # ══════════════════════════════════════════════════════════════════════════
-    # Đọc frame "$v0,v1,...,v7*chk" từ STM32/Arduino qua UART
-    # và publish từng sensor thành /ultrasonic/<name> (sensor_msgs/Range).
-    # Topic map: index 0..7 → us_top_left, us_top_right, us_mid_1_left,
-    #                          us_mid_1_right, us_mid_2_left, us_mid_2_right,
-    #                          us_bot_left, us_bot_right
-    #
-    # respawn=True: tự restart nếu mất kết nối USB
     jetson_sensor_bridge_node = Node(
         package='mobile_robot',
         executable='jetson_sensor_bridge.py',
@@ -211,7 +203,7 @@ def generate_launch_description():
     # ══════════════════════════════════════════════════════════════════════════
     # NODE 7 — Ultrasonic Fusion Node                                 [t = 3.5s]
     # ══════════════════════════════════════════════════════════════════════════
-    # Delay 0.5s sau imu_reader để đảm bảo /robot/state subscriber sẵn sàng.
+    # Delay 0.5s after imu_reader to ensure /robot/state subscriber is ready.
     # Subscribe: /ultrasonic/* (Range) + /robot/state
     # Publish:   /ultrasonic_scan (LaserScan) + /safety_stop (Bool)
     #            + /cmd_vel (gated) + /robot/emergency_stop

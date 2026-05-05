@@ -1,50 +1,21 @@
 #!/usr/bin/env python3
-# launch/slam_launch.py
 # ──────────────────────────────────────────────────────────────────────────────
-# Chạy trên JETSON AGX Xavier — Full Hardware Bringup + EKF + SLAM Toolbox
-#
-# Stack:
-#   1. robot_state_publisher      — URDF + TF tĩnh                    [t = 0.0s]
-#   2. joint_state_publisher      — /joint_states                     [t = 1.5s]
-#   3. wheel_odom_node            — STM32 UART → /odom                [t = 0.0s]
-#   4. bno055                     — I2C → /imu/data (~100 Hz)         [t = 0.0s]
-#   5. imu_reader                 — Quaternion → /imu/euler           [t = 3.0s]
-#   6. ekf_filter_node            — /odom + /imu/data → TF odom→base  [t = 3.0s]
-#   7. sllidar_node               — RPLIDAR S2E UDP → /scan           [t = 0.0s]
-#   8. scan_to_scan_filter_chain  — /scan → /scan_filtered            [t = 10.0s]
-#   9. async_slam_toolbox_node    — Online Async SLAM → /map          [t = 12.0s]
-#
-# TF tree:
-#   map ←(SLAM)← odom ←(EKF)← base_footprint ← base_link
-#                                              ├── chassis ── laser_frame
-#                                              │           ── imu_link
-#                                              │           ── caster_wheel
-#                                              ├── left_wheel
-#                                              └── right_wheel
-#
-# Môi trường (Jetson + Laptop phải giống nhau):
+# Run on JETSON AGX Xavier — Full Hardware Bringup + EKF + Nav2
+# Environment (Jetson + Laptop must be the same):
 #   export ROS_DOMAIN_ID=42
 #   export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
 #
-# Chạy:
-#   ros2 launch mobile_robot slam_launch.py
+# RUN SLAM:
+#   ros2 launch mobile_robot slam.launch.py
 #
-# Tiếp tục từ map đã lưu (.posegraph):
-#   ros2 launch mobile_robot slam_launch.py map_file_name:=/home/<user>/maps/my_map
+# Continue from a saved map (.posegraph):
+#   ros2 launch mobile_robot slam.launch.py map_file_name:=/home/<user>/maps/my_map
 #
-# Lưu map:
-#   # Lưu ảnh PNG/PGM + YAML (dùng cho Nav2):
-#   ros2 run nav2_map_server map_saver_cli -f ~/maps/my_map
-#   # Lưu .posegraph (tiếp tục SLAM sau này):
-#   ros2 service call /slam_toolbox/serialize_map \
-#       slam_toolbox/srv/SerializePoseGraph \
-#       "{filename: {data: '/home/<user>/maps/my_map'}}"
+# SAVE map PNG/PGM + YAML (use for Nav2):
+#   ros2 run nav2_map_server map_saver_cli -f ~/mbrobot_ws/src/mobile_robot/maps/
 #
-# Kiểm tra:
-#   ros2 topic hz /scan_filtered   # ~10 Hz
-#   ros2 topic hz /map             # cập nhật mỗi 5s
-#   ros2 topic echo /tf --once     # phải thấy map→odom và odom→base_footprint
-#   ros2 run tf2_tools view_frames # export TF tree PDF
+# SAVE map with Timeout và configure QoS:
+#   ros2 run nav2_map_server map_saver_cli -f ~/mbrobot_ws/src/mobile_robot/maps/... --ros-args -p save_map_timeout:=30000 -p map_subscribe_transient_local:=true
 # ──────────────────────────────────────────────────────────────────────────────
 
 import os
