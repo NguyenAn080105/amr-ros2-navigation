@@ -98,9 +98,6 @@ The App team's touchscreen UI calls our navigation API. When a user taps a desti
 - **[@Teammate2]** — Nav2 configuration, costmap design, behavior tree -->
 
 ➡️ **Simulation Repository:** [mobile-robot-ros2](https://github.com/NguyenAn080105/mobile-robot-ros2)
-
-> 📁 Full source code is maintained in a private team repository. **Code samples available upon request.**
-
 ---
 
 ## 🔧 My Personal Contributions
